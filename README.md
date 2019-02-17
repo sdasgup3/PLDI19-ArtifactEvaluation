@@ -1,12 +1,12 @@
 # [Paper 195] PLDI 2019 Artifact Evaluation
 
+
 ## Artifact Submission
-- Accepted Paper [pdf]()
+- Accepted Paper [pdf](https://github.com/sdasgup3/PLDI19-ArtifactEvaluation/blob/master/pldi2019-paper195.pdf)
 
 ## Getting Started Guide
 1. How to do the instalation
 2. Run bubble-sort program to check that the installation is correct.
-
 
 ## Step-by-Step Instructions
 
@@ -28,12 +28,10 @@ our semantics can be used for formal reasoning of x86-64
 programs for a wide variety of purposes. Here, we present the artifacts for
 the applications presented in Sections 5.2, 5.3 and 5.4
 
-Installation
-============
+### Installation
 TO DO
 
-5.2. Program Verification
-=========================
+### Section 5.2. Program Verification
 In this sub-section, we prove the functional correctness of the sum-to-n program.
 
 Working Directory: x86-semantics/program-veriifcation/sum_to_n_32_bit
@@ -45,70 +43,61 @@ test-spec.k: The actual specification file that is fed to the verifier. The spec
 runlog.txt : The pre-populated output of the verifier.
 run.sh     : Script to run the prover.
 
-Reproducing the runlog.txt
---------------------------
+#### Reproducing the runlog.txt
 ./run.sh
 
-Note
-----
+#### Note
 At the end of the section, we mentioned the time taken by the verifier to be
 ~1 min, which can be reproduced by the above command or can be cross-checked in the
 runlog.txt file.
 
 
-5.3. Symbolic Execution
-=======================
+### Section 5.3. Symbolic Execution
 In this section we  demonstrate how the symbolic execution
 capability can be used to find a security vulnerability.
 
 
-Working Directory: x86-semantics/program-veriifcation/safe_addrptr_32
+**Working Directory:** x86-semantics/program-veriifcation/safe_addrptr_32
 
 The directory structure:
-
-test-spec.k: The actual specification file that is fed to the verifier.
-runlog.txt : The pre-populated output of the verifier.
-run.sh     : Script to run the prover.
-path_condition.z3 : The z3 query that need to be solved in order to get the input triggering the 
+**test-spec.k:** The actual specification file that is fed to the verifier.
+**runlog.txt :** The pre-populated output of the verifier.
+**run.sh     :** Script to run the prover.
+**path_condition.z3 :** The z3 query that need to be solved in order to get the input triggering the 
                     security vulnerability.
 
-Interpretation of the runlog.txt and reproducing the vulnerability
------------------------------------------------------------
+#### Interpretation of the runlog.txt and reproducing the vulnerability
 1. At line number 87 of runlog.txt, we obtain the path condition when the control reaches L2 when r >= a (refer figure 4(a)). We encode this condition as a Z3 formula in path_condition.z3 and `AND` it with the condition for a + b to overflow. The resulting formula is checked for satisfiability. We mentioned all the details in path_condition.z3 as comments and request the reviewer to have a look at it.
 2. Execute `z3 path_condition.z3` to reproduce the inputs triggering the vulnerability.
 
-Reproducing the runlog.txt
---------------------------
+#### Reproducing the runlog.txt
 ./run.sh
 
-5.4. Translation Validation of Optimizations
-============================================
+### Section 5.4. Translation Validation of Optimizations
 In this section, we validated different optimizations of the "popcount" program, by checking the equivalence between the optimized programs.
 For the artifact evaluation, we will demonstrate the optimization made by Stoke super-optimizer (as this is the most interesting amont the other optimizations). If interested, we will be happy to provide details about the equivalnce of other optimizations.
 
 We symbolically execute the un-optimized popcount program and stoke-optimized program individually and compares their return values (i.e., the symbolic expression of the %rax
 register value) using Z3.
 
-Working Directory: x86-semantics/program-veriifcation/popcnt_loop
+**Working Directory:** x86-semantics/program-veriifcation/popcnt_loop
 
 The directory structure:
 
-test-spec.k: The actual specification file, of the un-optimized program, that is fed to the symbolic executor.
-runlog.txt : The pre-populated output of the symbolic executor.
-run.sh     : Script to run the symbolic executor.
-test.z3 : The z3 query that need to be solved in order to check the equivalence between the un-optimized and optimized prgrams.
+**test-spec.k:** The actual specification file, of the un-optimized program, that is fed to the symbolic executor.
+**runlog.txt :** The pre-populated output of the symbolic executor.
+**run.sh     :** Script to run the symbolic executor.
+**test.z3    :** The z3 query that need to be solved in order to check the equivalence between the un-optimized and optimized prgrams.
 
-Interpretation of the runlog.txt
------------------------------------------------------------
+#### Interpretation of the runlog.txt
 1. At line number 8710 of runlog.txt, we obtain the K expression represening the symbolic output stored in %rax for the un-optimized program.
 2. ...
 
-Note
-----
+#### Note
 Running run.sh might take ~23 mins.
 
 
-### Artifacts for "Reported Numbers/Percentages"
+## Artifacts for "Reported Numbers/Percentages"
 1. In Line 12-13, we mentioned "... This totals 3155 instruction variants, corresponding to 774
 mnemonics ..."
 
