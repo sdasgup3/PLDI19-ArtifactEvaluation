@@ -37,11 +37,10 @@ In this sub-section, we prove the functional correctness of the sum-to-n program
 Working Directory: x86-semantics/program-veriifcation/sum_to_n_32_bit
 
 The directory structure:
-
-test-spec.k: The actual specification file that is fed to the verifier. The specification has two parts:
+- test-spec.k: The actual specification file that is fed to the verifier. The specification has two parts:
              the top-level specification and the loop invariant.
-runlog.txt : The pre-populated output of the verifier.
-run.sh     : Script to run the prover.
+- runlog.txt : The pre-populated output of the verifier.
+- run.sh     : Script to run the prover.
 
 #### Reproducing the runlog.txt
 ./run.sh
@@ -60,11 +59,10 @@ capability can be used to find a security vulnerability.
 **Working Directory:** x86-semantics/program-veriifcation/safe_addrptr_32
 
 The directory structure:
-
-**test-spec.k:** The actual specification file that is fed to the verifier.
-**runlog.txt :** The pre-populated output of the verifier.
-**run.sh     :** Script to run the prover.
-**path_condition.z3 :** The z3 query that need to be solved in order to get the input triggering the 
+- **test-spec.k:** The actual specification file that is fed to the verifier.
+- **runlog.txt :** The pre-populated output of the verifier.
+- **run.sh     :** Script to run the prover.
+- **path_condition.z3 :** The z3 query that need to be solved in order to get the input triggering the 
                     security vulnerability.
 
 #### Interpretation of the runlog.txt and reproducing the vulnerability
@@ -84,11 +82,10 @@ register value) using Z3.
 **Working Directory:** x86-semantics/program-veriifcation/popcnt_loop
 
 The directory structure:
-
-**test-spec.k:** The actual specification file, of the un-optimized program, that is fed to the symbolic executor.
-**runlog.txt :** The pre-populated output of the symbolic executor.
-**run.sh     :** Script to run the symbolic executor.
-**test.z3    :** The z3 query that need to be solved in order to check the equivalence between the un-optimized and optimized prgrams.
+- **test-spec.k:** The actual specification file, of the un-optimized program, that is fed to the symbolic executor.
+- **runlog.txt :** The pre-populated output of the symbolic executor.
+- **run.sh     :** Script to run the symbolic executor.
+- **test.z3    :** The z3 query that need to be solved in order to check the equivalence between the un-optimized and optimized prgrams.
 
 #### Interpretation of the runlog.txt
 1. At line number 8710 of runlog.txt, we obtain the K expression represening the symbolic output stored in %rax for the un-optimized program.
