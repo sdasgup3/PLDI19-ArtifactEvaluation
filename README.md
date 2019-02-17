@@ -60,6 +60,7 @@ capability can be used to find a security vulnerability.
 **Working Directory:** x86-semantics/program-veriifcation/safe_addrptr_32
 
 The directory structure:
+
 **test-spec.k:** The actual specification file that is fed to the verifier.
 **runlog.txt :** The pre-populated output of the verifier.
 **run.sh     :** Script to run the prover.
