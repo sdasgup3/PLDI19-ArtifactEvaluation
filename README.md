@@ -9,7 +9,7 @@ In this section, we provide the instuctions to (1) Compile the semantics definit
 
 ### Compile the x86-64 semantics
 ```
-cd x86-semantics/semantics
+cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/semantics
 ../scripts/kompile.pl --backend java
 ```
 
@@ -18,7 +18,8 @@ We demonstrate how to interpret a X64-64 assembly language program using using t
 
 The following command converts a C file to assembly program and interprets it.
 ```
-../scripts/run-single-c-file.sh ../tests/program-tests/bubblesort/test.c
+cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/semantics
+../scripts/run-single-c-file.sh ../tests/Programs/bubblesort/test.c
 ```
 The expected output must looks like
 ```
@@ -27,18 +28,18 @@ Before Sort
 After Sort
 0 1 2 3 4
 ```
-The reviewer is encouraged to chose & run any program from `x86-semantics/tests/Programs` using
+The reviewer is encouraged to chose & run any program from `x86-semantics/tests/Programs`. For example,
 ```
-cd stdio_fprintf
+cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Programs/stdio_fprintf
 make all
 // create a file file.txt with content "We are in 2019"
 ```
 
-To run all the programs in the directory use ** Will take more that ~30 mins **
+To run all the programs in the directory use ** Will take ~30 mins**
 ```
 cd tests/program-tests
 ./run-tests.sh --cleankstate
-./run-tests.sh --kstate
+./run-tests.sh --kstate -jobs 5
 ```
 
 
@@ -47,14 +48,63 @@ cd tests/program-tests
 ### Artifacts for "Semantics of Instruction & Execution environment"
     |__(Refer Section 3)
 
-### Artifacts for "Testsuite"
+### Artifacts for "Testing"
     |_ Refer Section 4.1 --> Instruction Level Validation->Test Inputs
     |_       Section 4.1 --> Program Level Validation
 
+
+#### Instruction Level Testing
+The instruction level testing is done using Stoke's testing infrastructure.
+
+All the testing logs and commands are available at [link](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/nightlyruns). **We do not provide the repository in VM as it weighs 33G**
+
+Lets fist try to interpret some of the files present in the above link.
+ - job.04: A collection of instructions to be tested as a batch.
+ - info.04: Information about the batch. Like the date on which the test was fired, otput file name, etc.
+ - runlog.04: The output of the batch test.
+
+Note that the number `04` represents an ID that corresponds to Test Chart tables provided at [link](https://github.com/sdasgup3/x86-64-instruction-summary/blob/master/nightlyruns/README.md). These tables provide the information to test individual instructions in 3 broad categories: Registers instructions, Immediate instructions and Memeory instructions. The distribution is made because of different challeges that we faced during testing each ategory.
+
+As the entire testing took several days to complete, so we will provide instructions about testings sample instructions from each category so as to reproduce the results.
+
+##### Testing a register instruction (~4 mins runtime)
+- Preparing instruction working Directory
+```
+// Create an instance of assembly instruction
+~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_concrete --opcode popcntq_r64_r64 --workdir concrete_instances/register-variants/popcntq_r64_r64
+
+// In the above Test charts link above, you might see
+// commands just like above but with an extra
+// --samereg switch. This is to ensure that
+// instructions like xchg, xadd, cmpxchg are tested
+// with both the src and dest as same registers. This // is important as the semantics rules of these
+// instructions are different when the src and dest
+// are the same registers and hence we test them
+// separately.
+// For our sample run pop instruction, we do not need this switch.
+
+// Run the test
+~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --check_stoke --file concrete_instances/register-variants/popcntq_r64_r64/check_stoke.txt --instructions_path concrete_instances/register-variants/popcntq_r64_r64/instructions  --testid 00
+```
+##### Testing a immediate instruction (~4 mins runtime)
+- Preparing instruction working Directory
+```
+// create a working directory
+mkdir immediate-variants
+
+// Create 256 variants of instance of assembly
+// instruction each coresponding to 256 immeidate values.
+~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_concrete_imm --opcode pshufd_xmm_xmm_imm8 --workdir concrete_instances/immediate-variants/pshufd_xmm_xmm_imm8
+
+// Run the test
+~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --check_stoke --file concrete_instances/immediate-variants/pshufd_xmm_xmm_imm8/check_stoke.txt --instructions_path concrete_instances/immediate-variants/pshufd_xmm_xmm_imm8/instructions  --testid 00
+```
+
+
 ### Artifacts for "Reported Bugs"
-    |_ Refer Section 4.1 --> Instruction Level Validation --> Inconsistencies Found in the Intel Manual
-    |_       Section 4.2
-    |_       Line 776-781
+- [Bug reported in Intel](https://software.intel.com/en-us/forums/intel-isa-extensions/topic/773342): Refer Section 4.1 --> Instruction Level Validation --> Inconsistencies Found in the Intel Manual
+- Bug reported ([Report1](https://github.com/StanfordPL/stoke/issues/983) & [Report2](https://github.com/StanfordPL/stoke/issues/986)) & corresponding pull requests ([Request1](https://github.com/StanfordPL/stoke/pull/984) & [request2](https://github.com/StanfordPL/stoke/pull/985)) accepted in Stoke project: Refer Section 4.2
+
 
 ### Artifacts for "Applications" (Refer Section 5)
 In this section we presented some applications to demonstrate that
@@ -62,13 +112,10 @@ our semantics can be used for formal reasoning of x86-64
 programs for a wide variety of purposes. Here, we present the artifacts for
 the applications presented in Sections 5.2, 5.3 and 5.4
 
-### Installation
-TO DO
-
 ### Section 5.2. Program Verification
 In this sub-section, we prove the functional correctness of the sum-to-n program.
 
-Working Directory: x86-semantics/program-veriifcation/sum_to_n_32_bit
+Working Directory: /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/sum_to_n_32_bit
 
 The directory structure:
 - test-spec.k: The actual specification file that is fed to the verifier. The specification has two parts:
@@ -77,7 +124,10 @@ The directory structure:
 - run.sh     : Script to run the prover.
 
 #### Reproducing the runlog.txt
+```
+cd /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/sum_to_n_32_bit
 ./run.sh
+```
 
 #### Note
 At the end of the section, we mentioned the time taken by the verifier to be
@@ -90,7 +140,7 @@ In this section we  demonstrate how the symbolic execution
 capability can be used to find a security vulnerability.
 
 
-**Working Directory:** x86-semantics/program-veriifcation/safe_addrptr_32
+**Working Directory:** /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/safe_addrptr_32
 
 The directory structure:
 - **test-spec.k:** The actual specification file that is fed to the verifier.
@@ -104,7 +154,10 @@ The directory structure:
 2. Execute `z3 path_condition.z3` to reproduce the inputs triggering the vulnerability.
 
 #### Reproducing the runlog.txt
+```
+cd /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/safe_addrptr_32
 ./run.sh
+```
 
 ### Section 5.4. Translation Validation of Optimizations
 In this section, we validated different optimizations of the "popcount" program, by checking the equivalence between the optimized programs.
@@ -113,7 +166,7 @@ For the artifact evaluation, we will demonstrate the optimization made by Stoke 
 We symbolically execute the un-optimized popcount program and stoke-optimized program individually and compares their return values (i.e., the symbolic expression of the %rax
 register value) using Z3.
 
-**Working Directory:** x86-semantics/program-veriifcation/popcnt_loop
+**Working Directory:** /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/popcnt_loop
 
 The directory structure:
 - **test-spec.k:** The actual specification file, of the un-optimized program, that is fed to the symbolic executor.
@@ -125,9 +178,11 @@ The directory structure:
 1. At line number 8710 of runlog.txt, we obtain the K expression represening the symbolic output stored in %rax for the un-optimized program.
 2. ...
 
-#### Note
-Running run.sh might take ~23 mins.
-
+#### Reproducing the runlog.txt (take ~23 mins)
+```
+cd /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/popcnt_loop
+./run.sh
+```
 
 ## Artifacts for "Reported Numbers/Percentages"
 1. In Line 12-13, we mentioned "... This totals 3155 instruction variants, corresponding to 774
