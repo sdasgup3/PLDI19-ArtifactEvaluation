@@ -5,12 +5,46 @@
 - Accepted Paper [pdf](https://github.com/sdasgup3/PLDI19-ArtifactEvaluation/blob/master/pldi2019-paper195.pdf)
 
 ## Getting Started Guide
-1. How to do the instalation
-2. Run bubble-sort program to check that the installation is correct.
+In this section, we provide the instuctions to (1) Compile the semantics definition, and (2) Interpret a simple program using the "executable" semantics.
+
+### Compile the x86-64 semantics
+```
+cd x86-semantics/semantics
+../scripts/kompile.pl --backend java
+```
+
+### A simple test run
+We demonstrate how to interpret a X64-64 assembly language program using using the semantics compiled above. For demonstration, we use the [bubble-sort program](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/tests/Programs/bubblesort/test.c), which not only does the sorting but pretty-prints its results. The example, was chosen to show the c-library support provided (line 799-800) overa and above the executability of the semantics.
+
+The following command converts a C file to assembly program and interprets it.
+```
+../scripts/run-single-c-file.sh ../tests/program-tests/bubblesort/test.c
+```
+The expected output must looks like
+```
+Before Sort
+4 3 2 1 0
+After Sort
+0 1 2 3 4
+```
+The reviewer is encouraged to chose & run any program from `x86-semantics/tests/Programs` using
+```
+cd stdio_fprintf
+make all
+// create a file file.txt with content "We are in 2019"
+```
+
+To run all the programs in the directory use ** Will take more that ~30 mins **
+```
+cd tests/program-tests
+./run-tests.sh --cleankstate
+./run-tests.sh --kstate
+```
+
 
 ## Step-by-Step Instructions
 
-### Artifacts for "Semantics of Instruction & Execution environment" 
+### Artifacts for "Semantics of Instruction & Execution environment"
     |__(Refer Section 3)
 
 ### Artifacts for "Testsuite"
@@ -62,7 +96,7 @@ The directory structure:
 - **test-spec.k:** The actual specification file that is fed to the verifier.
 - **runlog.txt :** The pre-populated output of the verifier.
 - **run.sh     :** Script to run the prover.
-- **path_condition.z3 :** The z3 query that need to be solved in order to get the input triggering the 
+- **path_condition.z3 :** The z3 query that need to be solved in order to get the input triggering the
                     security vulnerability.
 
 #### Interpretation of the runlog.txt and reproducing the vulnerability
@@ -133,4 +167,3 @@ is also supported by Strata"
 14. In Line 819-821 we mentioned "Moreover, these manually written
 formulas are based on a similar model of the CPU state to
 ours, which makes it easier to compare them against ours by"
-
