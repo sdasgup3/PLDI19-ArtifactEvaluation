@@ -5,8 +5,8 @@
 - Accepted Paper [pdf](https://github.com/sdasgup3/PLDI19-ArtifactEvaluation/blob/master/pldi2019-paper195.pdf)
 - VM Details
   - VM Player: [VirtualBox 5.1](https://www.virtualbox.org/wiki/Download_Old_Builds_5_1)
-  - Ubuntu Image: [ova](https://drive.google.com/file/d/1F9jeFrsmQN9ZO7lvf6bC79zseSl4uqmz/view?usp=sharing)
-    - md5 hash: d310791d6bf6efae3025f275c4bdaad1
+  - Ubuntu Image: [ova](https://drive.google.com/file/d/1MkMC-5Mei1MAV4BqhUjMIy_53CAFcuOB/view?usp=sharing)
+    - md5 hash: f224015ed0eb6dcb5fd8aab9cb437c87
     - login: sdasgup3
     - password: aecadmin123
   - Guest Machine requirements
@@ -69,7 +69,7 @@ $ ./run-tests.sh --kstate -jobs 4
 #### Instruction Level Testing (Refer Section 4.1 --> Instruction Level Validation)
 The instruction level testing is done using (1) [Stoke](https://github.com/StanfordPL/stoke)'s testing infrastructure, and (2) [K](https://github.com/kframework/k) interpreter generated using our semantic defintion.
 
-##### Using Stoke testing infrastructure
+##### testing using Stoke's testing infrastructure
 All the test logs and commands are available at [link](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/nightlyruns). **( We do not provide the repository in VM as it weighs 33 GB)**
 
 Lets fist try to interpret some of the files present in the above link.
@@ -107,9 +107,10 @@ The idea is to first create an instance of the assembly instruction under test a
     Execution time popcntq_r64_r64: 208 s
     Thread 1 done!: popcntq_r64_r64
   ```
-  Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/concrete_instances/register-variants/psrlq_xmm_xmm)
+Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/concrete_instances/register-variants/psrlq_xmm_xmm)
 
-  Similar logs for other instructons can also be found using similar paths as above. 
+Similar logs for other instructons can also be found using similar paths as above.
+
 
 ##### Testing a immediate instruction ( ~4 mins runtime )
 The idea is same as above except the fact that for each immediate instruction of immediate operand width as 8, we create 256 variants of instance of assembly instruction each coresponding to 256 immeidate values and test all of them. We spawn 256 software threads to accomodate all the runs for each insruction.
@@ -121,7 +122,8 @@ $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_
 $ sed -i '5,$ d' concrete_instances/immediate-variants/psrlq_xmm_imm8/check_stoke.txt
 $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --check_stoke --file concrete_instances/immediate-variants/psrlq_xmm_imm8/check_stoke.txt --instructions_path concrete_instances/immediate-variants/psrlq_xmm_imm8/instructions  --testid 00
 ```
-The expected output is same as before.
+Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/concrete_instances/immediate-variants/psrlq_xmm_imm8). Similar logs for other instructons can also be found using similar paths as above.
+
 
 ##### Testing a memory instruction ( ~4 mins runtime )
 The idea is same as above ideas (when the memory instruction has an immediate or register operand) except the fact the [Strata testcases](https://raw.githubusercontent.com/sdasgup3/strata-data-private/master/data-regs/testcases.tc) are not meant to test the memory instructions (In fact the Strata project do not test or synthesize the memory instructions). Hence, the testcases need to be modified slightly to accomodate testing memory-variants. For example, it we want to test `addq (%rbx), %rax`, we need to make sure that the register `%rbx` points to a valid memory address with some value to read from. We accomplish this using the switch `--update_tc` mentioned below.
@@ -132,23 +134,33 @@ $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_
 $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --opcode  psrlq_xmm_m128  --instructions_path concrete_instances/memory-variants/psrlq_xmm_m128/instructions/ --update_tc --testid 00
 $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --check_stoke --file concrete_instances/memory-variants/psrlq_xmm_m128/check_stoke.txt --instructions_path concrete_instances/memory-variants/psrlq_xmm_m128/instructions --use_updated_tc --testid 00
 ```
-The expected output is same as before.
+Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/concrete_instances/memory-variants/psrlq_xmm_m128). Similar logs for other instructons can also be found using similar paths as above.
+
+#### Testing using K-interpreter
+Empowered by the fact that we can directly execute the se-
+mantics using the K framework, we validated our model by co-simulating it against a real machine.
+
+
 
 
 
 #### Comparing with Stoke (Refer Section 4.2)
-In this section, we provide instructions about how we cross-checked (using Z3 comparsion) our semantics of those instruction which are modelled by Stoke as well.
+In this section, we provide instructions about how we cross-checked (using Z3 comparsion) our semantics of those instruction which are modelled by [Stoke](https://github.com/StanfordPL/stoke) (say ST1) as well. We own a separate branch of [Stoke](https://github.com/sdasgup3/strata-stoke) (say ST2) where we manually modelled many instruction's semantics to compare against ST1.
 
+Comparison is achieved by using unsat checks on the corresponding SMT formulas. Such comparison helped in unveiling many bugs as reported in Section 4.2.
+
+Below, we give example of one such instruction `psrlq` for which we found that the ST1 implementation to be buggy(which is fixed in ST1 by now using [pull request](https://github.com/StanfordPL/stoke/pull/984).
 
 ```bash
 $ cd ~/TestArena
 $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_concrete --opcode psrlq_xmm_m128 --workdir concrete_instances/memory-variants/psrlq_xmm_m128
-$ ~/Github/strata/stoke/bin/stoke_debug_circuit --strata_path /home/sdasgup3/Github/strata-data/circuits/ --opc psrlq_xmm_m128 --smtlib_format &> concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.strata.A.z3.sym
-$ ~/Github/strata/stoke/bin/stoke_debug_circuit  --opc psrlq_xmm_m128 --smtlib_format &> concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/{}.strata.B.z3.sym
+$ ~/Github/master_stoke/bin/stoke_debug_formula  --opc psrlq_xmm_m128 --smtlib_format &> concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.ST1.z3.sym
+$ ~/Github/strata/stoke/bin/stoke_debug_circuit  --opc psrlq_xmm_m128 --smtlib_format &> concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.ST2.z3.sym
 
-~/Github/binary-decompilation/x86-semantics/scripts/z3compare.pl --file concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.strata.A.z3.sym  --file concrete_instances/memory-variants/{}/instructions/psrlq_xmm_m128/psrlq_xmm_m128.strata.B.z3.sym --opcode psrlq_xmm_m128 --workfile concrete_instances/memory-variants/{}/instructions/psrlq_xmm_m128/psrlq_xmm_m128.prove.A.B.z3 ; z3 concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.prove.A.B.z3
+
+$ ~/Github/binary-decompilation/x86-semantics/scripts/z3compare.pl --file concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.ST1.z3.sym  --file concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.ST2.z3.sym --opcode psrlq_xmm_m128 --workfile concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.prove.ST1.ST2.z3 ; z3 concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.prove.ST1.ST2.z3
 ```
-
+Expected reslt: `unsat`
 
 
 ### Artifacts for "Reported Bugs"
