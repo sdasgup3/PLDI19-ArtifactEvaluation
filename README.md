@@ -66,7 +66,7 @@ $ ./run-tests.sh --kstate -jobs 4
 
 ### Artifacts for "Testing"
 
-#### Instruction Level Testing (Section 4.1 --> Instruction Level Validation)
+#### Instruction Level Testing (Refer Section 4.1 --> Instruction Level Validation)
 The instruction level testing is done using (1) [Stoke](https://github.com/StanfordPL/stoke)'s testing infrastructure, and (2) [K](https://github.com/kframework/k) interpreter generated using our semantic defintion.
 
 ##### Using Stoke testing infrastructure
@@ -107,9 +107,12 @@ The idea is to first create an instance of the assembly instruction under test a
     Execution time popcntq_r64_r64: 208 s
     Thread 1 done!: popcntq_r64_r64
   ```
+  Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/concrete_instances/register-variants/psrlq_xmm_xmm)
+
+  Similar logs for other instructons can also be found using similar paths as above. 
 
 ##### Testing a immediate instruction ( ~4 mins runtime )
-The idea is same as above except that the fact that for each immediate instruction of immediate operand width as 8, we create 256 variants of instance of assembly instruction each coresponding to 256 immeidate values and test all of them. We spawn 256 software threads to accomodate all the runs for each insruction.
+The idea is same as above except the fact that for each immediate instruction of immediate operand width as 8, we create 256 variants of instance of assembly instruction each coresponding to 256 immeidate values and test all of them. We spawn 256 software threads to accomodate all the runs for each insruction.
 
 In the example below, we will be testing the instruction psrlq_xmm_imm8 for just 4 immediate operand values (0-3).
 ```bash
@@ -121,16 +124,32 @@ $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --check_st
 The expected output is same as before.
 
 ##### Testing a memory instruction ( ~4 mins runtime )
-The idea is same as above except that the fact that for each immediate instruction of immediate operand width as 8, we create 256 instances of assembly instruction each coresponding to 256 immediate values and test all of them. We spawn 256 software threads to accomodate all the runs for each insruction.
+The idea is same as above ideas (when the memory instruction has an immediate or register operand) except the fact the [Strata testcases](https://raw.githubusercontent.com/sdasgup3/strata-data-private/master/data-regs/testcases.tc) are not meant to test the memory instructions (In fact the Strata project do not test or synthesize the memory instructions). Hence, the testcases need to be modified slightly to accomodate testing memory-variants. For example, it we want to test `addq (%rbx), %rax`, we need to make sure that the register `%rbx` points to a valid memory address with some value to read from. We accomplish this using the switch `--update_tc` mentioned below.
 
-In the example below, we will be testing the instruction psrlq_xmm_imm8 for just 4 immediate operand values (0-3).
 ```bash
 $ cd ~/TestArena
-$ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_concrete_imm --opcode psrlq_xmm_imm8 --workdir concrete_instances/immediate-variants/psrlq_xmm_imm8
-$ sed -i '5,$ d' concrete_instances/immediate-variants/psrlq_xmm_imm8/check_stoke.txt
-$ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --check_stoke --file concrete_instances/immediate-variants/psrlq_xmm_imm8/check_stoke.txt --instructions_path concrete_instances/immediate-variants/psrlq_xmm_imm8/instructions  --testid 00
+$ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_concrete --opcode psrlq_xmm_m128 --workdir concrete_instances/memory-variants/psrlq_xmm_m128
+$ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --opcode  psrlq_xmm_m128  --instructions_path concrete_instances/memory-variants/psrlq_xmm_m128/instructions/ --update_tc --testid 00
+$ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --check_stoke --file concrete_instances/memory-variants/psrlq_xmm_m128/check_stoke.txt --instructions_path concrete_instances/memory-variants/psrlq_xmm_m128/instructions --use_updated_tc --testid 00
 ```
 The expected output is same as before.
+
+
+
+#### Comparing with Stoke (Refer Section 4.2)
+In this section, we provide instructions about how we cross-checked (using Z3 comparsion) our semantics of those instruction which are modelled by Stoke as well.
+
+
+```bash
+$ cd ~/TestArena
+$ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_concrete --opcode psrlq_xmm_m128 --workdir concrete_instances/memory-variants/psrlq_xmm_m128
+$ ~/Github/strata/stoke/bin/stoke_debug_circuit --strata_path /home/sdasgup3/Github/strata-data/circuits/ --opc psrlq_xmm_m128 --smtlib_format &> concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.strata.A.z3.sym
+$ ~/Github/strata/stoke/bin/stoke_debug_circuit  --opc psrlq_xmm_m128 --smtlib_format &> concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/{}.strata.B.z3.sym
+
+~/Github/binary-decompilation/x86-semantics/scripts/z3compare.pl --file concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.strata.A.z3.sym  --file concrete_instances/memory-variants/{}/instructions/psrlq_xmm_m128/psrlq_xmm_m128.strata.B.z3.sym --opcode psrlq_xmm_m128 --workfile concrete_instances/memory-variants/{}/instructions/psrlq_xmm_m128/psrlq_xmm_m128.prove.A.B.z3 ; z3 concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.prove.A.B.z3
+```
+
+
 
 ### Artifacts for "Reported Bugs"
 - [Bug reported in Intel](https://software.intel.com/en-us/forums/intel-isa-extensions/topic/773342): Refer Section 4.1 --> Instruction Level Validation --> Inconsistencies Found in the Intel Manual
@@ -253,3 +272,7 @@ is also supported by Strata"
 14. In Line 819-821 we mentioned "Moreover, these manually written
 formulas are based on a similar model of the CPU state to
 ours, which makes it easier to compare them against ours by"
+
+
+15. FLowchart for instruction support.
+16. Porting (https://github.com/sdasgup3/binary-decompilation/wiki/Handling-Register-Instructions)
