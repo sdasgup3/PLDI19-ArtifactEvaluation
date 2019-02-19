@@ -3,45 +3,60 @@
 
 ## Artifact Submission
 - Accepted Paper [pdf](https://github.com/sdasgup3/PLDI19-ArtifactEvaluation/blob/master/pldi2019-paper195.pdf)
+- VM Details
+  - VM Player: [VirtualBox 5.1](https://www.virtualbox.org/wiki/Download_Old_Builds_5_1)
+  - Ubuntu Image: [ova](https://drive.google.com/file/d/1F9jeFrsmQN9ZO7lvf6bC79zseSl4uqmz/view?usp=sharing)
+    - md5 hash: d310791d6bf6efae3025f275c4bdaad1
+    - login: sdasgup3
+    - password: aecadmin123
+  - Guest Machine requirements
+    - Minimum 8 GB of RAM.
+  - Host machine requirements
+    - Architecture family of host processor must be Haswell or beyond.
+    - Enable the processor flag `avx2` in the guest Ubuntu, if not enabled by default (which can be checked in /proc/cpuinfo), using the following command in the host machine, where vm_name is the name used for the VM. According to the [link](https://askubuntu.com/questions/699077/how-to-enable-avx2-extensions-on-a-ubuntu-guest-in-virtualbox-5), such flags are exposed in the guest machine by default since VirtualBox 5.0 Beta 3.
+      ```bash
+      $ VBoxManage setextradata "vm_name" VBoxInternal/CPUM/IsaExts/AVX2 1
+      ```
+
+
 
 ## Getting Started Guide
 In this section, we provide the instuctions to (1) Compile the semantics definition, and (2) Interpret a simple program using the "executable" semantics.
 
 ### Compile the x86-64 semantics
-```
-cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/semantics
-../scripts/kompile.pl --backend java
+```bash
+$ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/semantics
+$ ../scripts/kompile.pl --backend java
 ```
 
 ### A simple test run
 We demonstrate how to interpret a X64-64 assembly language program using using the semantics compiled above. For demonstration, we use the [bubble-sort program](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/tests/Programs/bubblesort/test.c), which not only does the sorting but pretty-prints its results. The example, was chosen to show the c-library support provided (line 799-800) overa and above the executability of the semantics.
 
 The following command converts a C file to assembly program and interprets it.
-```
-cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/semantics
-../scripts/run-single-c-file.sh ../tests/Programs/bubblesort/test.c
+```bash
+$ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/semantics
+$ ../scripts/run-single-c-file.sh ../tests/Programs/bubblesort/test.c
 ```
 The expected output must looks like
-```
+```C
 Before Sort
 4 3 2 1 0
 After Sort
 0 1 2 3 4
 ```
 The reviewer is encouraged to chose & run any program from `x86-semantics/tests/Programs`. For example,
+```bash
+$ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Programs/stdio_fprintf
+$ make all
 ```
-cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Programs/stdio_fprintf
-make all
-// create a file file.txt with content "We are in 2019"
-```
+The expected output is: A file named file.txt is created with content "We are in 2019"
 
-To run all the programs in the directory use ** Will take ~30 mins**
+To run all the programs in the directory use (**take ~30 mins**)
+```bash
+$ cd tests/program-tests
+$ ./run-tests.sh --cleankstate
+$ ./run-tests.sh --kstate -jobs 5
 ```
-cd tests/program-tests
-./run-tests.sh --cleankstate
-./run-tests.sh --kstate -jobs 5
-```
-
 
 ## Step-by-Step Instructions
 
@@ -210,7 +225,7 @@ of the target instructions..."
 10. In Line 363-366, we mentioned "... compared against the semantics defined in the Stoke project for about 330 instructions that were omitted in Strata..."
 
 
-11. In Line 574-576, we mentoned "For each instruction, we converted the SMT formulas that Strata provides to a K specification using a simple script (∼500 LOC)."
+11. In Line 574-576, we mentioned "For each instruction, we converted the SMT formulas that Strata provides to a K specification using a simple script (∼500 LOC)."
 
 12. In Line 641-644, we mentioned "the original Strata-provided formula for shrxl %edx, %ecx, %ebx consists of 8971 terms (including the operator symbols), but we could simplify it to a formula
 consisting of only 7 terms"
