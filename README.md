@@ -12,8 +12,8 @@
   - Guest Machine requirements
     - Minimum 8 GB of RAM.
   - Host machine requirements
-    - Architecture family of host processor must be Haswell or beyond.
-    - Enable the processor flag `avx2` in the guest Ubuntu, if not enabled by default (which can be checked in /proc/cpuinfo), using the following command in the host machine, where vm_name is the name used for the VM. According to the [link](https://askubuntu.com/questions/699077/how-to-enable-avx2-extensions-on-a-ubuntu-guest-in-virtualbox-5), such flags are exposed in the guest machine by default since VirtualBox 5.0 Beta 3.
+    - Architecture family of host processor must be Haswell or beyond (can be checked using `gcc -march=native -Q --help=target|grep march`).
+    - Enable the processor flag `avx2` in the guest Ubuntu, if not enabled by default (which can be checked in `/proc/cpuinfo`), using the following command in the host machine, where vm_name is the name used for the VM. According to the [link](https://askubuntu.com/questions/699077/how-to-enable-avx2-extensions-on-a-ubuntu-guest-in-virtualbox-5), such flags are exposed in the guest machine by default since VirtualBox 5.0 Beta 3.
       ```bash
       $ VBoxManage setextradata "vm_name" VBoxInternal/CPUM/IsaExts/AVX2 1
       ```
@@ -49,13 +49,13 @@ The reviewer is encouraged to chose & run any program from `x86-semantics/tests/
 $ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Programs/stdio_fprintf
 $ make all
 ```
-The expected output is: A file named file.txt is created with content "We are in 2019"
+The expected output is: A file named file.txt is created in the current working directorywith contents as "We are in 2019"
 
 To run all the programs in the directory use (**take ~30 mins**)
 ```bash
 $ cd tests/program-tests
 $ ./run-tests.sh --cleankstate
-$ ./run-tests.sh --kstate -jobs 5
+$ ./run-tests.sh --kstate -jobs 4
 ```
 
 ## Step-by-Step Instructions
