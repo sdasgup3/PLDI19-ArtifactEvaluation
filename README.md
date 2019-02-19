@@ -11,6 +11,7 @@
     - password: aecadmin123
   - Guest Machine requirements
     - Minimum 8 GB of RAM.
+    - Recommended number of processors is 4 to allow parallel experiments.
   - Host machine requirements
     - Architecture family of host processor must be Haswell or beyond (can be checked using `gcc -march=native -Q --help=target|grep march`).
     - Enable the processor flag `avx2` in the guest Ubuntu, if not enabled by default (which can be checked in `/proc/cpuinfo`), using the following command in the host machine, where vm_name is the name used for the VM. According to the [link](https://askubuntu.com/questions/699077/how-to-enable-avx2-extensions-on-a-ubuntu-guest-in-virtualbox-5), such flags are exposed in the guest machine by default since VirtualBox 5.0 Beta 3.
@@ -64,57 +65,72 @@ $ ./run-tests.sh --kstate -jobs 4
     |__(Refer Section 3)
 
 ### Artifacts for "Testing"
-    |_ Refer Section 4.1 --> Instruction Level Validation->Test Inputs
-    |_       Section 4.1 --> Program Level Validation
 
+#### Instruction Level Testing (Section 4.1 --> Instruction Level Validation)
+The instruction level testing is done using (1) [Stoke](https://github.com/StanfordPL/stoke)'s testing infrastructure, and (2) [K](https://github.com/kframework/k) interpreter generated using our semantic defintion.
 
-#### Instruction Level Testing
-The instruction level testing is done using Stoke's testing infrastructure.
-
-All the testing logs and commands are available at [link](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/nightlyruns). **We do not provide the repository in VM as it weighs 33G**
+##### Using Stoke testing infrastructure
+All the test logs and commands are available at [link](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/nightlyruns). **( We do not provide the repository in VM as it weighs 33 GB)**
 
 Lets fist try to interpret some of the files present in the above link.
- - job.04: A collection of instructions to be tested as a batch.
- - info.04: Information about the batch. Like the date on which the test was fired, otput file name, etc.
- - runlog.04: The output of the batch test.
+ - [job.04](https://github.com/sdasgup3/x86-64-instruction-summary/blob/master/nightlyruns/job.04): A collection of instructions to be tested as a batch (or job).
+ - [info.04](https://github.com/sdasgup3/x86-64-instruction-summary/blob/master/nightlyruns/info.04): Information about the job. Like the date on which the test was fired, output file name, etc.
+ - [runlog.04](https://github.com/sdasgup3/x86-64-instruction-summary/blob/master/nightlyruns/runlog.04): The output of the job run.
 
-Note that the number `04` represents an ID that corresponds to Test Chart tables provided at [link](https://github.com/sdasgup3/x86-64-instruction-summary/blob/master/nightlyruns/README.md). These tables provide the information to test individual instructions in 3 broad categories: Registers instructions, Immediate instructions and Memeory instructions. The distribution is made because of different challeges that we faced during testing each ategory.
+Note that the number `04` represents an ID that corresponds to `Test Chart` [tables](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/nightlyruns#test-charts-2) provided at [link](https://github.com/sdasgup3/x86-64-instruction-summary/blob/master/nightlyruns/README.md). These tables provide the information about how individual instructions are tested using 3 broad categories: Registers instructions, Immediate instructions and Memeory instructions. The distribution is made because of different challenges need to address while testing each category.
 
-As the entire testing took several days to complete, so we will provide instructions about testings sample instructions from each category so as to reproduce the results.
+As the entire testing took several days to complete, so we will provide instructions about testings sample instructions from each category in order to reproduce the results.
 
-##### Testing a register instruction (~4 mins runtime)
-- Preparing instruction working Directory
+##### Testing a register instruction ( ~4 mins runtime )
+The idea is to first create an instance of the assembly instruction under test and then to test that instance using a set of input CPU states. In the `Test charts` link above, we might find variants of the the command mentioned below, for example, one with an extra --samereg switch. This is to ensure that instructions like xchg, xadd, cmpxchg are tested with both the src and dest operands as same registers. This is important as the semantics rules of these instructions are different when the src and dest are the same registers and hence we test them separately.
+  ```bash
+  $ cd ~/TestArena
+  $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_concrete --opcode psrlq_xmm_xmm --workdir concrete_instances/register-variants/psrlq_xmm_xmm
+  $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --check_stoke --file concrete_instances/register-variants/psrlq_xmm_xmm/check_stoke.txt --instructions_path concrete_instances/register-variants/psrlq_xmm_xmm/instructions  --testid 00
+  ```
+  Expected output:
+  ```C
+    Info:Firing Last 1
+    Thread 1 start: psrlq_xmm_xmm
+    timeout 30m     /home/sdasgup3/Github/strata/stoke/./bin/stoke_check_circuit --strata_path /Github/strata-data/circuits --target concrete_instances/register-variants/psrlq_xmm_xmm/instructions/psrlq_xmm_xmm/psrlq_xmm_xmm.s --functions ~/Github/strata-data/data-regs/functions --testcases ~/Github/strata-data/data-regs/testcases.tc --def_in "{ %xmm1 %xmm2 }" --live_out "{ %xmm1 }" --maybe_undef_out "{ }"
+    Reading the Testsuit
+    Preparing Sandbox
+    Run 6630 tests
+    Collect Results
+    Check Equivalence
+    Completed 1000cases
+    Completed 2000cases
+    Completed 3000cases
+    Completed 4000cases
+    Completed 5000cases
+    Completed 6000cases
+    Execution time popcntq_r64_r64: 208 s
+    Thread 1 done!: popcntq_r64_r64
+  ```
+
+##### Testing a immediate instruction ( ~4 mins runtime )
+The idea is same as above except that the fact that for each immediate instruction of immediate operand width as 8, we create 256 variants of instance of assembly instruction each coresponding to 256 immeidate values and test all of them. We spawn 256 software threads to accomodate all the runs for each insruction.
+
+In the example below, we will be testing the instruction psrlq_xmm_imm8 for just 4 immediate operand values (0-3).
+```bash
+$ cd ~/TestArena
+$ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_concrete_imm --opcode psrlq_xmm_imm8 --workdir concrete_instances/immediate-variants/psrlq_xmm_imm8
+$ sed -i '5,$ d' concrete_instances/immediate-variants/psrlq_xmm_imm8/check_stoke.txt
+$ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --check_stoke --file concrete_instances/immediate-variants/psrlq_xmm_imm8/check_stoke.txt --instructions_path concrete_instances/immediate-variants/psrlq_xmm_imm8/instructions  --testid 00
 ```
-// Create an instance of assembly instruction
-~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_concrete --opcode popcntq_r64_r64 --workdir concrete_instances/register-variants/popcntq_r64_r64
+The expected output is same as before.
 
-// In the above Test charts link above, you might see
-// commands just like above but with an extra
-// --samereg switch. This is to ensure that
-// instructions like xchg, xadd, cmpxchg are tested
-// with both the src and dest as same registers. This // is important as the semantics rules of these
-// instructions are different when the src and dest
-// are the same registers and hence we test them
-// separately.
-// For our sample run pop instruction, we do not need this switch.
+##### Testing a memory instruction ( ~4 mins runtime )
+The idea is same as above except that the fact that for each immediate instruction of immediate operand width as 8, we create 256 instances of assembly instruction each coresponding to 256 immediate values and test all of them. We spawn 256 software threads to accomodate all the runs for each insruction.
 
-// Run the test
-~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --check_stoke --file concrete_instances/register-variants/popcntq_r64_r64/check_stoke.txt --instructions_path concrete_instances/register-variants/popcntq_r64_r64/instructions  --testid 00
+In the example below, we will be testing the instruction psrlq_xmm_imm8 for just 4 immediate operand values (0-3).
+```bash
+$ cd ~/TestArena
+$ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_concrete_imm --opcode psrlq_xmm_imm8 --workdir concrete_instances/immediate-variants/psrlq_xmm_imm8
+$ sed -i '5,$ d' concrete_instances/immediate-variants/psrlq_xmm_imm8/check_stoke.txt
+$ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --check_stoke --file concrete_instances/immediate-variants/psrlq_xmm_imm8/check_stoke.txt --instructions_path concrete_instances/immediate-variants/psrlq_xmm_imm8/instructions  --testid 00
 ```
-##### Testing a immediate instruction (~4 mins runtime)
-- Preparing instruction working Directory
-```
-// create a working directory
-mkdir immediate-variants
-
-// Create 256 variants of instance of assembly
-// instruction each coresponding to 256 immeidate values.
-~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_concrete_imm --opcode pshufd_xmm_xmm_imm8 --workdir concrete_instances/immediate-variants/pshufd_xmm_xmm_imm8
-
-// Run the test
-~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --check_stoke --file concrete_instances/immediate-variants/pshufd_xmm_xmm_imm8/check_stoke.txt --instructions_path concrete_instances/immediate-variants/pshufd_xmm_xmm_imm8/instructions  --testid 00
-```
-
+The expected output is same as before.
 
 ### Artifacts for "Reported Bugs"
 - [Bug reported in Intel](https://software.intel.com/en-us/forums/intel-isa-extensions/topic/773342): Refer Section 4.1 --> Instruction Level Validation --> Inconsistencies Found in the Intel Manual
@@ -199,7 +215,7 @@ cd /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/pro
 ./run.sh
 ```
 
-## Artifacts for "Reported Numbers/Percentages"
+## Artifacts for "Reported Numbers/Claims"
 1. In Line 12-13, we mentioned "... This totals 3155 instruction variants, corresponding to 774
 mnemonics ..."
 
@@ -208,7 +224,7 @@ mnemonics ..."
 3. In Line 66-70, we mentioed "Goel et al. ...  only a small fragment (∼33%) of all user-level instructions..."
 
 4. In Line 136, we mentioned "Our formal semantics is publicly available ..."
-
+    - Public [Github Repo](https://github.com/kframework/X86-64-semantics)
 5. In Line 143, we mentioned "It consists of 996 mnemonics, and each mnemonic admits several variants,"
 
 6. In Line 185, we mentioned "Remill  updates the flag with 0 .. Radare  keeps it unmodified."
