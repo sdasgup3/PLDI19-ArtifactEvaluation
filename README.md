@@ -91,7 +91,7 @@ Note that the number `04` represents an ID that corresponds to `Test Chart` [tab
 As the entire testing took several days to complete, so we will provide instructions about testings sample instructions from each category in order to reproduce the results.
 
 ##### Testing a register instruction ( ~4 mins runtime )
-The idea is to first create an instance of the assembly instruction under test and then to test that instance using a set of input CPU states. In the `Test charts` link above, we might find variants of the the command mentioned below, for example, one with an extra --samereg switch. This is to ensure that instructions like xchg, xadd, cmpxchg are tested with both the src and dest operands as same registers. This is important as the semantics rules of these instructions are different when the src and dest are the same registers and hence we test them separately.
+The idea is to first create an instance of the assembly instruction under test and then to test that instance using a set of input CPU states. In the `Test charts` link above, we might find variants of the the command mentioned below, for example, one with an extra `--samereg` switch. This is to ensure that instructions like `xchg`, `xadd`, `cmpxchg` are tested with both the source and destination operands as same registers. This is important as the semantics rules of such instructions are different when the source and destination are the same and hence we test them separately.
   ```bash
   $ cd ~/TestArena
   $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_concrete --opcode psrlq_xmm_xmm --workdir concrete_instances/register-variants/psrlq_xmm_xmm
@@ -169,7 +169,7 @@ $ ~/Github/strata/stoke/bin/stoke_debug_circuit  --opc psrlq_xmm_m128 --smtlib_f
 
 $ ~/Github/binary-decompilation/x86-semantics/scripts/z3compare.pl --file concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.ST1.z3.sym  --file concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.ST2.z3.sym --opcode psrlq_xmm_m128 --workfile concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.prove.ST1.ST2.z3 ; z3 concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.prove.ST1.ST2.z3
 ```
-Expected reslt: `unsat`
+Expected result: `unsat`
 
 
 ### Artifacts for "Reported Bugs"
