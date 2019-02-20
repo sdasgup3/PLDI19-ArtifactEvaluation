@@ -149,6 +149,62 @@ Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/tree
 Empowered by the fact that we can directly execute the se-
 mantics using the K framework, we validated our model by co-simulating it against a real machine.
 
+Working directory: /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions/
+
+First, we will explain the employed testing infrastructure. The idea is to test each instruction using many test-inputs. The test inputs are specified conviniently using a template assembly program and a separate program `gentests.pl` reads the template and create the actual assembly language program to be tested. We use K-interppreter to exceute the program and result is compared against the results obtained by running the program on actual harware. 
+
+The [working directory](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions) contain  instructions which are tested using the above idea. As the actual run might take long to complete, we provide directions to run some sample instructions with small number of inputs.
+
+An example template program is shown below with comments explaining the template structure.
+```C
+TEST_BEGIN(PCLMULQDQ, 3) // Specify that pclmulqdq needs three
+                         // inputs to be tuned
+TEST_INPUTS(             // Values of the 3 inputs.
+    0,                    0xFEFEFEFEFEFEFEFE,   0,
+    0x80,                 0xF7F7F7F7,           127,
+    0x0F0F,               0x0F0F,               11,
+    0xF7F7F7F7,           0x80,                 18,
+    0xFEFEFEFEFEFEFEFE,   0,                    255)
+
+    movq  ARG1_64,  %rax  // ARG1_64, ARG2_64, ARG3_8 will be in-place
+                          // replaced with values in each row of TEST_INPUTS.
+    movq  ARG2_64,  %rbx
+    movq  %rax, %xmm0
+    movq  %rbx, %xmm2
+    movddup %xmm0, %xmm0
+    movddup %xmm2, %xmm2
+
+    pclmulqdq ARG3_8, %xmm1, %xmm2
+TEST_END
+```
+
+The instructions below are use to generate the assembly program `(test.s)` and test it.
+```bash
+$ cd  /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions/sample_pclmulqdq
+$ ../../../scripts/gentests.pl
+$ make all
+$ grep "Pass" Output/test.cstate
+```
+
+In order to run any test in [working directory](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions):
+```
+$ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions/adc/
+$ make all
+$ grep "Pass" Output/test.cstate
+```
+
+In order to run all the tests in [working directory](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions):
+```bash
+$ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions/
+$ ./run-tests.sh --all --jobs 4
+```
+
+
+
+
+
+
+
 
 
 
