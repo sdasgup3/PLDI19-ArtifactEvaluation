@@ -5,8 +5,8 @@
 - Accepted Paper [pdf](https://github.com/sdasgup3/PLDI19-ArtifactEvaluation/blob/master/pldi2019-paper195.pdf)
 - VM Details
   - VM Player: [VirtualBox 5.1](https://www.virtualbox.org/wiki/Download_Old_Builds_5_1)
-  - Ubuntu Image: [ova](https://drive.google.com/file/d/1MkMC-5Mei1MAV4BqhUjMIy_53CAFcuOB/view?usp=sharing)
-    - md5 hash: f224015ed0eb6dcb5fd8aab9cb437c87
+  - Ubuntu Image: [ova](https://drive.google.com/file/d/1CS-jqQdtFPzS58lTXOspazDdfSG9hT0_/view?usp=sharing)
+    - md5 hash: a2aa3a7f74b9b1668d8f5b6125c8aef1
     - login: sdasgup3
     - password: aecadmin123
   - Guest Machine requirements
@@ -64,7 +64,7 @@ $ ./run-tests.sh --kstate -jobs 4
 
 ## Step-by-Step Instructions
 
-### Artifacts for "Semantics of Instruction & Execution environment"
+### Artifacts for "Semantics of Instruction & Execution environment" (Refer sections 3.3, 3.4 & 3.5)
 
 | Semantics                | Modeled by                                                                                                  |
 |-------------------------|--------------------------------------------------------------------------------------------------------------|
