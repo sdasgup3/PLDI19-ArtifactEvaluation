@@ -14,7 +14,7 @@
     - Recommended number of processors is 4 to allow parallel experiments.
   - Host machine requirements
     - Architecture family of host processor must be Haswell or beyond.
-    - Enable the processor flag `avx2` in the guest Ubuntu, if not enabled by default (which can be checked in `/proc/cpuinfo`), using the following command in the host machine, where vm_name is the name used for the VM. According to the [link](https://askubuntu.com/questions/699077/how-to-enable-avx2-extensions-on-a-ubuntu-guest-in-virtualbox-5), such flags are exposed in the guest machine by default since VirtualBox 5.0 Beta 3.
+    - Enable the processor flag `avx2` in the guest Ubuntu, if not enabled by default (which can be checked using `/proc/cpuinfo`), using the following command in the host machine, where vm_name is the name used for the VM. According to the [link](https://askubuntu.com/questions/699077/how-to-enable-avx2-extensions-on-a-ubuntu-guest-in-virtualbox-5), such flags are exposed in the guest machine by default since VirtualBox 5.0 Beta 3.
       ```bash
       $ VBoxManage setextradata "vm_name" VBoxInternal/CPUM/IsaExts/AVX2 1
       ```
@@ -65,7 +65,7 @@ After Sort
 #### Instruction Level Testing (Refer Section 4.1 --> Instruction Level Validation)
 The instruction level testing is done using (1) [Stoke](https://github.com/StanfordPL/stoke)'s testing infrastructure, and (2) [K](https://github.com/kframework/k) interpreter generated using our semantic definition.
 
-##### testing using Stoke's testing infrastructure
+##### Testing using Stoke's testing infrastructure
 All the test logs and commands are available at [link](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/nightlyruns). **( We do not provide the repository in VM as it weighs 33 GB)**
 
 Lets fist try to interpret some of the files present in the above link.
@@ -77,7 +77,7 @@ Note that the number `04` represents an ID that corresponds to `Test Chart` [tab
 
 As the entire testing took several days to complete, so we will provide instructions about testings sample instructions from each category in order to reproduce the results.
 
-##### Testing a register instruction ( ~4 mins runtime )
+###### Testing a register instruction ( ~29 secs runtime )
 The idea is to first create an instance of the assembly instruction under test and then to test that instance using a set of input CPU states. In the `Test charts` link above, we might find variants of the the command mentioned below, for example, one with an extra `--samereg` switch. This is to ensure that instructions like `xchg`, `xadd`, `cmpxchg` are tested with both the source and destination operands as same registers. This is important as the semantics rules of such instructions are different when the source and destination are the same and hence we test them separately.
   ```bash
   $ cd ~/TestArena
@@ -108,7 +108,7 @@ Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/tree
 Similar logs for other instructions can also be found using similar paths as above.
 
 
-##### Testing a immediate instruction ( ~4 mins runtime )
+###### Testing a immediate instruction ( ~2 mins runtime )
 The idea is same as above except the fact that for each immediate instruction of immediate operand width as 8, we create 256 variants of instance of assembly instruction each corresponding to 256 immeidate values and test all of them. We spawn 256 software threads to accommodate all the runs for each instruction.
 
 In the example below, we will be testing the instruction psrlq_xmm_imm8 for just 4 immediate operand values (0-3).
@@ -121,7 +121,7 @@ $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --check_st
 Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/concrete_instances/immediate-variants/psrlq_xmm_imm8). Similar logs for other instructions can also be found using similar paths as above.
 
 
-##### Testing a memory instruction ( ~4 mins runtime )
+###### Testing a memory instruction ( ~72 secs runtime )
 The idea is same as above ideas (when the memory instruction has an immediate or register operand) except the fact the [Strata testcases](https://raw.githubusercontent.com/sdasgup3/strata-data-private/master/data-regs/testcases.tc) are not meant to test the memory instructions (In fact the Strata project do not test or synthesize the memory instructions). Hence, the testcases need to be modified slightly to accommodate testing memory-variants. For example, it we want to test `addq (%rbx), %rax`, we need to make sure that the register `%rbx` points to a valid memory address with some value to read from. We accomplish this using the switch `--update_tc` mentioned below.
 
 ```bash
@@ -132,7 +132,7 @@ $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --check_st
 ```
 Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/concrete_instances/memory-variants/psrlq_xmm_m128). Similar logs for other instructions can also be found using similar paths as above.
 
-#### Testing using K-interpreter
+##### Testing using K-interpreter
 Empowered by the fact that we can directly execute the semantics using the K framework, we validated our model by co-simulating it against a real machine.
 
 
@@ -163,7 +163,7 @@ TEST_INPUTS(             // Values of the 3 inputs.
 TEST_END
 ```
 
-The instructions below are use to generate the assembly program `(test.s)` and test it.
+The instructions below are use to generate the assembly program `(test.s)` and test it (~ 67.38 secs).
 ```bash
 $ cd  /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions/sample_pclmulqdq
 $ ./run-test.sh
@@ -175,7 +175,7 @@ make all
 grep "Pass" Output/test.cstate
 ```
 
-Next, we will discuss how to reproduce the issue, mentioned at line 728-733, regarding the floating point precision issues. We will demonstrate this using `vfmadd` instruction.
+Next, we will discuss how to reproduce the issue, mentioned at line 728-733, regarding the floating point precision. We will demonstrate this using `vfmadd` instruction (~ 70.20 secs).
 ```
 $ cd  /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions/sample_vfmadd
 $ ./run-test.sh
@@ -192,7 +192,7 @@ Value obtained by hardware execution:  -17.850725 (0xc18ece49)
 But our semantics compute it as round(round(-2.477901 * 12.078431) + 12.078431)  = -17.850727 (0xc18ece4a), which incurs precision loss due to rounding twice.
 ```
 
-Running the some of the tests in the [working directory](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions), might take long time (\~1 hr), but interested reader might try the following (\~ 3mins)
+Running some of the tests in the [working directory](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions), might take long time (\~1 hr), but interested reader might try the following (\~ 2mins)
 
 ```
 $ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions/adc/
@@ -205,7 +205,7 @@ $ grep "Pass" Output/test.cstate
 ##### Feature testing
 Throughout the course of this project, we develop many programs to test various features of semantics, like library function, memory model. A collection is provide at [Programs]( https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Programs)
 
-The reviewer is encouraged to chose & run any program from `x86-semantics/tests/Programs`. For example,
+The reviewer is encouraged to chose & run any program from `x86-semantics/tests/Programs`. For example the following (~97 sec),
 ```bash
 $ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Programs/stdio_fprintf
 $ rm -rf ../../../semantics/underTestInstructions/*
@@ -329,43 +329,52 @@ cd /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/pro
 ```
 
 ## Artifacts for "Reported Numbers/Claims"
-1. In Line 12-13, we mentioned "... This totals 3155 instruction variants, corresponding to 774
-mnemonics ..."
+1. Instruction supported by our and related works
+    - In Line 12-13, we mentioned "... This totals 3155 instruction variants, corresponding to 774
+  mnemonics ..."
+    - In Line 51, we mentioned "Heule et al. ...,  but it covers only a fragment (∼47%) of all instructions ..."
+    - In Line 66-70, we mentioned "Goel et al. ...  only a small fragment (∼33%) of all user-level instructions..."
 
-2. In Line 51, we mentioned "Heule et al. ...,  but it covers only a fragment (∼47%) of all instructions ..."
+The following script will generate the above statistics in a markdown table format shown below.
+```
+/home/sdasgup3/Github/binary-decompilation/x86-semantics/scripts --compareintel
+```
 
-3. In Line 66-70, we mentioned "Goel et al. ...  only a small fragment (∼33%) of all user-level instructions..."
+  | Scope of instrucion support | Number of Att/Intel Opcodes |
+|-----|-----|
+ | Total Att/Intel Opcodes |1298/1000|
+| Ideal User Level Support(att/intel)| 1009/774|
 
-4. In Line 136, we mentioned "Our formal semantics is publicly available ..."
+| Project Name | Number of Att/Intel Opcodes [Supported percentage w.r.t Ideal User Level Support] |
+|-----|-----|
+| Current Support(att/intel)| 1009/774 	[100 %]|
+| Bap Support(att/intel)| 439/275 	[35.5297157622739 %]|
+| Radar2 Support(att/intel)| 415/218 	[28.1653746770026 %]|
+| Strata Support(att/intel)| 598/466 	[60.2067183462532 %]|
+| McSema Support(Intel)| 478/478 	[61.7571059431525 %]|
+| ACL2 Support(Intel)| 255 	[32.9457364341085 %]|
+
+Note that:
+  - The number `1009` **does not** consider the instruction variants w.r.t register/immediate/memory.
+  - The numbers presented here for related work are counted generously and is true to the best of our knowledge till November 2018. It does not include the new instructions support that might have been added since then.
+  - To know about the actual list of instructions supported by each project till Novenber 2018, refer [Our Work](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/k-semantics/current_support.txt), [BAP](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/bap/baprunlog.txt), [Radar2](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/radare2/r2log.txt), [Strata](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/strata/strata_orig_supported.txt), [Remill](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/mcsema/reportlist.txt), [ACL2](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/acl2/implemented.txt).
+
+
+2. In Line 136, we mentioned "Our formal semantics is publicly available ..."
     - Public [Github Repo](https://github.com/kframework/X86-64-semantics)
-5. In Line 143, we mentioned "It consists of 996 mnemonics, and each mnemonic admits several variants,"
 
-6. In Line 185, we mentioned "Remill  updates the flag with 0 .. Radare  keeps it unmodified."
+3. In Line 185, we mentioned "Remill  updates the flag with 0 .. Radare  keeps it unmodified."
+The orresponding code can be veiwed at [Remill](https://github.com/trailofbits/remill/blob/master/tests/X86/Run.cpp#L398) & [Radare](https://github.com/sdasgup3/x86-64-instruction-summary/blob/ad67b2d5ac5565da4033b77afc82ce4e5195ef51/executale_binaries/register-variants/andnq_r64_r64_r64.r2log). Also, we have personal discussions with the respective authors about this.
 
-7. In Line  139, we mentioned "Strata .. 1905 instruction variants (representing 466 unique mnemon- ics) of the x86-64 Haswell ISA"
-
-8. In Line 323-326, we mentioned "To leverage previous work as much as possible, we took the semantic rules for about 60% of the instructions
-in scope from the formal semantics in Strata"
-
-9. In Line 351-352, we mentioned "We then manually added K rules for the remaining 40%
-of the target instructions..."
+3. Instruction coverage effort
+    - In Line 323-326, we mentioned "To leverage previous work as much as possible, we took the semantic rules for about 60% of the instructions in scope from the formal semantics in Strata"
+    - In Line 351-352, we mentioned "We then manually added K rules for the remaining 40% of the target instructions..."
 
 
-10. In Line 363-366, we mentioned "... compared against the semantics defined in the Stoke project for about 330 instructions that were omitted in Strata..."
+4. In Line 574-576, we mentioned "For each instruction, we converted the SMT formulas that Strata provides to a K specification using a simple script (∼500 LOC)."
 
-
-11. In Line 574-576, we mentioned "For each instruction, we converted the SMT formulas that Strata provides to a K specification using a simple script (∼500 LOC)."
-
-12. In Line 641-644, we mentioned "the original Strata-provided formula for shrxl %edx, %ecx, %ebx consists of 8971 terms (including the operator symbols), but we could simplify it to a formula
+5. In Line 641-644, we mentioned "the original Strata-provided formula for shrxl %edx, %ecx, %ebx consists of 8971 terms (including the operator symbols), but we could simplify it to a formula
 consisting of only 7 terms"
-
-13. In Line 814-817, we mentioned "Stoke  contains manually written semantics for ∼1764
-x86-64 instruction variants, a large fraction (81%) of which
-is also supported by Strata"
-
-14. In Line 819-821 we mentioned "Moreover, these manually written
-formulas are based on a similar model of the CPU state to
-ours, which makes it easier to compare them against ours by"
 
 
 15. FLowchart for instruction support.
