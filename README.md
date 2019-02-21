@@ -65,7 +65,7 @@ After Sort
 #### Instruction Level Testing (Refer Section 4.1 --> Instruction Level Validation)
 The instruction level testing is done using (1) [Stoke](https://github.com/StanfordPL/stoke)'s testing infrastructure, and (2) [K](https://github.com/kframework/k) interpreter generated using our semantic definition.
 
-##### testing using Stoke's testing infrastructure
+##### Testing using Stoke's testing infrastructure
 All the test logs and commands are available at [link](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/nightlyruns). **( We do not provide the repository in VM as it weighs 33 GB)**
 
 Lets fist try to interpret some of the files present in the above link.
