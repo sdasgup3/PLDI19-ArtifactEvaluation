@@ -336,8 +336,8 @@ cd /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/pro
     - In Line 66-70, we mentioned "Goel et al. ...  only a small fragment (∼33%) of all user-level instructions..."
 
 The following script will generate the above statistics in a markdown table format shown below.
-```
-/home/sdasgup3/Github/binary-decompilation/x86-semantics/scripts --compareintel
+```bash
+$ /home/sdasgup3/Github/binary-decompilation/x86-semantics/scripts --compareintel
 ```
 
   | Scope of instrucion support | Number of Att/Intel Opcodes |
