@@ -14,7 +14,7 @@
     - Recommended number of processors is 4 to allow parallel experiments.
   - Host machine requirements
     - Architecture family of host processor must be Haswell or beyond.
-    - Enable the processor flag `avx2` in the guest Ubuntu, if not enabled by default (which can be checked using `/proc/cpuinfo`), using the following command in the host machine, where vm_name is the name used for the VM. According to the [link](https://askubuntu.com/questions/699077/how-to-enable-avx2-extensions-on-a-ubuntu-guest-in-virtualbox-5), such flags are exposed in the guest machine by default since VirtualBox 5.0 Beta 3.
+    - Enable the processor flag `avx2` in the guest Ubuntu, if not enabled by default (which can be checked by, e.g., running `grep avx2 /proc/cpuinfo`), using the following command in the host machine, where vm_name is the name used for the VM. According to the [link](https://askubuntu.com/questions/699077/how-to-enable-avx2-extensions-on-a-ubuntu-guest-in-virtualbox-5), such flags are exposed in the guest machine by default since VirtualBox 5.0 Beta 3.
       ```bash
       $ VBoxManage setextradata "vm_name" VBoxInternal/CPUM/IsaExts/AVX2 1
       ```
@@ -34,7 +34,7 @@ $ ../scripts/kompile.pl --backend java
 ```
 
 ### A simple test run
-We demonstrate how to interpret a X64-64 assembly language program using the semantics compiled above. For demonstration, we use the [bubble-sort program](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/tests/Programs/bubblesort/test.c), which not only does the sorting but pretty-prints its results. The example, was chosen to show the c-library support provided (line 799-800) over and above the executability of the semantics.
+We demonstrate how to interpret a X64-64 assembly language program using the semantics compiled above. For demonstration, we use the [bubble-sort program](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/tests/Programs/bubblesort/test.c), which not only does the sorting but pretty-prints its results. The example, was chosen to show the c-library support provided (lines 799-800 of the paper) over and above the executability of the semantics.
 
 The following command converts a C file to assembly program and interprets it.
 ```bash
@@ -51,7 +51,7 @@ After Sort
 
 ## Step-by-Step Instructions
 
-### Artifacts for "Semantics of Instruction & Execution environment" (Refer sections 3.3, 3.4 & 3.5)
+### Artifacts for "Semantics of Instruction & Execution environment" (Refer to Sections 3.3, 3.4 & 3.5)
 
 | Semantics                | Modeled by                                                                                                  |
 |-------------------------|--------------------------------------------------------------------------------------------------------------|
@@ -62,7 +62,7 @@ After Sort
 
 ### Artifacts for "Testing"
 
-#### Instruction Level Testing (Refer Section 4.1 --> Instruction Level Validation)
+#### Instruction Level Testing (Refer to Section 4.1 --> Instruction Level Validation)
 The instruction level testing is done using (1) [Stoke](https://github.com/StanfordPL/stoke)'s testing infrastructure, and (2) [K](https://github.com/kframework/k) interpreter generated using our semantic definition.
 
 ##### Testing using Stoke's testing infrastructure
@@ -233,7 +233,7 @@ $ grep -l Fail Output/*.compare.log
 ```
 The run logs might have diffs (or Fails) like above `Output/20010605-1-0.compare.log`. These are mainly due to the presence of instructions like `subq	$16, %rsp` whose result (value of destination register (`%rsp`) and status flags) depends on the value of `%rsp` which might be different for actual hardware and our simulated environment.
 
-#### Comparing with Stoke (Refer Section 4.2)
+#### Comparing with Stoke (Refer to Section 4.2)
 In this section, we provide instructions about how we cross-checked (using Z3 comparison) our semantics of those instruction which are modeled by [Stoke](https://github.com/StanfordPL/stoke) (say ST1) as well. We own a separate branch of [Stoke](https://github.com/sdasgup3/strata-stoke) (say ST2) where we manually modeled many instruction's semantics to compare against ST1.
 
 Comparison is achieved by using unsat checks on the corresponding SMT formulas. Such comparison helped in unveiling many bugs as reported in Section 4.2.
@@ -251,11 +251,11 @@ Expected result: `unsat`
 
 
 ### Artifacts for "Reported Bugs"
-- [Bug reported in Intel](https://software.intel.com/en-us/forums/intel-isa-extensions/topic/773342): Refer Section 4.1 --> Instruction Level Validation --> Inconsistencies Found in the Intel Manual
-- Bug reported ([Report1](https://github.com/StanfordPL/stoke/issues/983) & [Report2](https://github.com/StanfordPL/stoke/issues/986)) & corresponding pull requests ([Request1](https://github.com/StanfordPL/stoke/pull/984) & [request2](https://github.com/StanfordPL/stoke/pull/985)) accepted in Stoke project: Refer Section 4.2
+- [Bug reported in Intel](https://software.intel.com/en-us/forums/intel-isa-extensions/topic/773342): Refer to Section 4.1 --> Instruction Level Validation --> Inconsistencies Found in the Intel Manual
+- Bug reported ([Report1](https://github.com/StanfordPL/stoke/issues/983) & [Report2](https://github.com/StanfordPL/stoke/issues/986)) & corresponding pull requests ([Request1](https://github.com/StanfordPL/stoke/pull/984) & [request2](https://github.com/StanfordPL/stoke/pull/985)) accepted in Stoke project: Refer to Section 4.2
 
 
-### Artifacts for "Applications" (Refer Section 5)
+### Artifacts for "Applications" (Refer to Section 5)
 In this section we presented some applications to demonstrate that
 our semantics can be used for formal reasoning of x86-64
 programs for a wide variety of purposes. Here, we present the artifacts for
