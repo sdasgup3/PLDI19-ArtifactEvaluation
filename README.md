@@ -14,7 +14,7 @@
     - Recommended number of processors is 4 to allow parallel experiments.
   - Host machine requirements
     - Architecture family of host processor must be Haswell or beyond.
-    - Enable the processor flag `avx2` in the guest Ubuntu, if not enabled by default (which can be checked in `/proc/cpuinfo`), using the following command in the host machine, where vm_name is the name used for the VM. According to the [link](https://askubuntu.com/questions/699077/how-to-enable-avx2-extensions-on-a-ubuntu-guest-in-virtualbox-5), such flags are exposed in the guest machine by default since VirtualBox 5.0 Beta 3.
+    - Enable the processor flag `avx2` in the guest Ubuntu, if not enabled by default (which can be checked by, e.g., running `grep avx2 /proc/cpuinfo`), using the following command in the host machine, where vm_name is the name used for the VM. According to the [link](https://askubuntu.com/questions/699077/how-to-enable-avx2-extensions-on-a-ubuntu-guest-in-virtualbox-5), such flags are exposed in the guest machine by default since VirtualBox 5.0 Beta 3.
       ```bash
       $ VBoxManage setextradata "vm_name" VBoxInternal/CPUM/IsaExts/AVX2 1
       ```
