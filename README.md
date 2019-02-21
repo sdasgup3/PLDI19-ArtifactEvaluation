@@ -4,9 +4,9 @@
 ## Artifact Submission
 - Accepted Paper [pdf](https://github.com/sdasgup3/PLDI19-ArtifactEvaluation/blob/master/pldi2019-paper195.pdf)
 - VM Details
-  - VM Player: [VirtualBox 5.1](https://www.virtualbox.org/wiki/Download_Old_Builds_5_1)
-  - Ubuntu Image: [ova](https://drive.google.com/file/d/1L57JC_U1Im95icSPbN1XkmNATsg-iQDA/view?usp=sharing)
-    - md5 hash: 30f3a9aa94e327c54c7d7e05dd891bd7
+  - VM Player: [VirtualBox 6.0.4](https://www.virtualbox.org/wiki/Downloads) Or [VirtualBox 5.1](https://www.virtualbox.org/wiki/Download_Old_Builds_5_1)
+  - Ubuntu Image: [ova](https://drive.google.com/file/d/1V-S8jcmnRiazjlcnBEwhvR2EfJKNB-Bl/view?usp=sharing)
+    - md5 hash: 2747bfeba27987163ee5a479b8955a66
     - login: sdasgup3
     - password: aecadmin123
   - Guest Machine requirements
@@ -166,16 +166,19 @@ TEST_END
 The instructions below are use to generate the assembly program `(test.s)` and test it.
 ```bash
 $ cd  /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions/sample_pclmulqdq
-$ ../../../scripts/gentests.pl
-$ make all
-$ grep "Pass" Output/test.cstate
+$ ./run-test.sh
+
+The above contains following commands
+../../../scripts/gentests.pl
+rm -rf ../../../semantics/underTestInstructions/*
+make all
+grep "Pass" Output/test.cstate
 ```
 
 Next, we will discuss how to reproduce the issue, mentioned at line 728-733, regarding the floating point precision issues. We will demonstrate this using `vfmadd` instruction.
 ```
 $ cd  /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions/sample_vfmadd
-$ ../../../scripts/gentests.pl
-$ make all
+$ ./run-test.sh
 $ grep -A 3 "Failed" Output/test.cstate
 ```
 The issue is with `vfmadd132ss %xmm4,%xmm8,%xmm0` instruction with the register values as
@@ -193,6 +196,7 @@ Running the some of the tests in the [working directory](https://github.com/sdas
 
 ```
 $ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions/adc/
+$ rm -rf ../../../semantics/underTestInstructions/*
 $ make all
 $ grep "Pass" Output/test.cstate
 ```
@@ -204,6 +208,7 @@ Throughout the course of this project, we develop many programs to test various 
 The reviewer is encouraged to chose & run any program from `x86-semantics/tests/Programs`. For example,
 ```bash
 $ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Programs/stdio_fprintf
+$ rm -rf ../../../semantics/underTestInstructions/*
 $ make all
 The expected output is: A file named file.txt is created in the current working directory with contents as "We are in 2019"
 ```
@@ -240,8 +245,6 @@ $ cd ~/TestArena
 $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_concrete --opcode psrlq_xmm_m128 --workdir concrete_instances/memory-variants/psrlq_xmm_m128
 $ ~/Github/master_stoke/bin/stoke_debug_formula  --opc psrlq_xmm_m128 --smtlib_format &> concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.ST1.z3.sym
 $ ~/Github/strata/stoke/bin/stoke_debug_circuit  --opc psrlq_xmm_m128 --smtlib_format &> concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.ST2.z3.sym
-
-
 $ ~/Github/binary-decompilation/x86-semantics/scripts/z3compare.pl --file concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.ST1.z3.sym  --file concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.ST2.z3.sym --opcode psrlq_xmm_m128 --workfile concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.prove.ST1.ST2.z3 ; z3 concrete_instances/memory-variants/psrlq_xmm_m128/instructions/psrlq_xmm_m128/psrlq_xmm_m128.prove.ST1.ST2.z3
 ```
 Expected result: `unsat`
@@ -261,24 +264,22 @@ the applications presented in Sections 5.2, 5.3 and 5.4
 ### Section 5.2. Program Verification
 In this sub-section, we prove the functional correctness of the sum-to-n program.
 
-Working Directory: /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/sum_to_n_32_bit
-
 The directory structure:
-- test-spec.k: The actual specification file that is fed to the verifier. The specification has two parts:
+- [test-spec.k](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/test-spec.k): The actual specification file that is fed to the verifier. The specification has two parts:
              the top-level specification and the loop invariant.
-- runlog.txt : The pre-populated output of the verifier.
-- run.sh     : Script to run the prover.
+- [runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/runlog.txt) : The pre-populated output of the verifier.
+- [run.sh](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/run.sh)     : Script to run the prover.
 
 #### Reproducing the runlog.txt
-```
-cd /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/sum_to_n_32_bit
-./run.sh
+```bash
+$ cd /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/sum_to_n_32_bit
+$ ./run.sh
 ```
 
 #### Note
-At the end of the section, we mentioned the time taken by the verifier to be
-~1 min, which can be reproduced by the above command or can be cross-checked in the
-runlog.txt file.
+At the end of the section 5.2 in paper, we mentioned the time taken by the verifier to be
+~1 min, which can be can be cross-checked in the
+[runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/runlog.txt) file. The time reproduced by the above command is ~ 2 mins which might be due to the fact that we are running on VM.
 
 
 ### Section 5.3. Symbolic Execution
@@ -286,23 +287,22 @@ In this section we  demonstrate how the symbolic execution
 capability can be used to find a security vulnerability.
 
 
-**Working Directory:** /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/safe_addrptr_32
-
 The directory structure:
-- **test-spec.k:** The actual specification file that is fed to the verifier.
-- **runlog.txt :** The pre-populated output of the verifier.
-- **run.sh     :** Script to run the prover.
-- **path_condition.z3 :** The z3 query that need to be solved in order to get the input triggering the
+- [test-spec.k](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/test-spec.k): The actual specification file that is fed to the verifier.
+- [runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/runlog.txt) : The pre-populated output of the verifier.
+- [run.sh](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/run.sh)     : Script to run the prover.
+- [path_condition.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/path_condition.z3) : The z3 query that need to be solved in order to get the input triggering the
                     security vulnerability.
 
 #### Interpretation of the runlog.txt and reproducing the vulnerability
-1. At line number 87 of runlog.txt, we obtain the path condition when the control reaches L2 when r >= a (refer figure 4(a)). We encode this condition as a Z3 formula in path_condition.z3 and `AND` it with the condition for a + b to overflow. The resulting formula is checked for satisfiability. We mentioned all the details in path_condition.z3 as comments and request the reviewer to have a look at it.
-2. Execute `z3 path_condition.z3` to reproduce the inputs triggering the vulnerability.
+1. At line number 87 of runlog.txt, we obtain the path condition when the control reaches L2 when r >= a (refer figure 4(a)). We encode this condition as a Z3 formula in [path_condition.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/path_condition.z3) and `AND` it with the condition for a + b to overflow. The resulting formula is checked for satisfiability. We mentioned all the details in path_condition.z3 as comments and request the reviewer to have a look at it.
+2. We can execute `z3 path_condition.z3` to reproduce the inputs triggering the vulnerability as shown below.
 
 #### Reproducing the runlog.txt
-```
-cd /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/safe_addrptr_32
-./run.sh
+```bash
+$ cd /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/safe_addrptr_32
+$ ./run.sh
+$ z3 path_condition.z3
 ```
 
 ### Section 5.4. Translation Validation of Optimizations
@@ -312,13 +312,11 @@ For the artifact evaluation, we will demonstrate the optimization made by Stoke 
 We symbolically execute the un-optimized popcount program and stoke-optimized program individually and compares their return values (i.e., the symbolic expression of the %rax
 register value) using Z3.
 
-**Working Directory:** /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/popcnt_loop
-
 The directory structure:
-- **test-spec.k:** The actual specification file, of the un-optimized program, that is fed to the symbolic executor.
-- **runlog.txt :** The pre-populated output of the symbolic executor.
-- **run.sh     :** Script to run the symbolic executor.
-- **test.z3    :** The z3 query that need to be solved in order to check the equivalence between the un-optimized and optimized programs.
+- [test-spec.k](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/test-spec.k): The actual specification file, of the un-optimized program, that is fed to the symbolic executor.
+- [runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/runlog.txt) : The pre-populated output of the symbolic executor.
+- [run.sh](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/run.sh)     : Script to run the symbolic executor.
+- [test.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/test.z3)    : The z3 query that need to be solved in order to check the equivalence between the un-optimized and optimized programs.
 
 #### Interpretation of the runlog.txt
 1. At line number 8710 of runlog.txt, we obtain the K expression representing the symbolic output stored in %rax for the un-optimized program.
