@@ -5,8 +5,8 @@
 - Accepted Paper [pdf](https://github.com/sdasgup3/PLDI19-ArtifactEvaluation/blob/master/pldi2019-paper195.pdf)
 - VM Details
   - VM Player: [VirtualBox 5.1](https://www.virtualbox.org/wiki/Download_Old_Builds_5_1)
-  - Ubuntu Image: [ova](https://drive.google.com/file/d/1CS-jqQdtFPzS58lTXOspazDdfSG9hT0_/view?usp=sharing)
-    - md5 hash: a2aa3a7f74b9b1668d8f5b6125c8aef1
+  - Ubuntu Image: [ova](https://drive.google.com/file/d/1L57JC_U1Im95icSPbN1XkmNATsg-iQDA/view?usp=sharing)
+    - md5 hash: 30f3a9aa94e327c54c7d7e05dd891bd7
     - login: sdasgup3
     - password: aecadmin123
   - Guest Machine requirements
@@ -47,19 +47,6 @@ Before Sort
 4 3 2 1 0
 After Sort
 0 1 2 3 4
-```
-The reviewer is encouraged to chose & run any other program from `x86-semantics/tests/Programs`. For example,
-```bash
-$ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Programs/stdio_fprintf
-$ make all
-```
-The expected output is: A file named file.txt is created in the current working directory with contents as "We are in 2019"
-
-To run all the programs in the directory use (**take ~30 mins**)
-```bash
-$ cd tests/program-tests
-$ ./run-tests.sh --cleankstate
-$ ./run-tests.sh --kstate -jobs 4
 ```
 
 ## Step-by-Step Instructions
@@ -149,7 +136,7 @@ Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/tree
 Empowered by the fact that we can directly execute the semantics using the K framework, we validated our model by co-simulating it against a real machine.
 
 
-First, we will explain the employed testing infrastructure. The idea is to test each instruction using many test-inputs. The test inputs are specified conviniently using a template assembly program and a separate program `gentests.pl` reads the template and create the actual assembly language program to be tested. We use K-interppreter to exceute the program and result is compared against the results obtained by running the program on actual harware.
+First, we will explain the employed testing infrastructure. The idea is to test each instruction using many test-inputs. The test inputs are specified conveniently using a template assembly program and a separate program `gentests.pl` reads the template and create the actual assembly language program to be tested. We use K-interppreter to execute the program and result is compared against the result obtained by running the program on actual hardware.
 
 The [working directory](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions) contain  instructions which are tested using the above idea. As the actual run might take long to complete, we provide directions to run some sample instructions with small number of inputs.
 
@@ -184,28 +171,62 @@ $ make all
 $ grep "Pass" Output/test.cstate
 ```
 
-In order to run any test in [working directory](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions):
+Next, we will discuss how to reproduce the issue, mentioned at line 728-733, regarding the floating point precision issues. We will demonstrate this using `vfmadd` instruction.
+```
+$ cd  /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions/sample_vfmadd
+$ ../../../scripts/gentests.pl
+$ make all
+$ grep -A 3 "Failed" Output/test.cstate
+```
+The issue is with `vfmadd132ss %xmm4,%xmm8,%xmm0` instruction with the register values as
+```
+%ymm4: 0x4141414141414141414141414141414141414141414141414141414141414141 whose least significand 32-bits represents 12.078431.
+%ymm8: 0x4141414141414141414141414141414141414141414141414141414141414141 whose least significand 32-bits represents 12.078431.
+%ymm0:0x00000000000000000000000000000000431df789431df78945b1a734c01e95ee whose least significand 32-bits represents -2.477901.
+
+The instruction is supposed to compute (-2.477901 * 12.078431) + 12.078431, with rounding happening once after addition.
+Value obtained by hardware execution:  -17.850725 (0xc18ece49)
+But our semantics compute it as round(round(-2.477901 * 12.078431) + 12.078431)  = -17.850727 (0xc18ece4a), which incurs precision loss due to rounding twice.
+```
+
+Running the some of the tests in the [working directory](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions), might take long time (~1 hr), but interested reader might try the following (~ 3mins)
+
 ```
 $ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions/adc/
 $ make all
 $ grep "Pass" Output/test.cstate
 ```
 
-In order to run all the tests in [working directory](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions):
+#### Program Level Testing
+##### Feature testing
+Throughout the course of this project, we develop many programs to test various features of semantics, like library function, memory model. A collection is provide at [Programs]( https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Programs)
+
+The reviewer is encouraged to chose & run any program from `x86-semantics/tests/Programs`. For example,
 ```bash
-$ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions/
-$ ./run-tests.sh --all --jobs 4
+$ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Programs/stdio_fprintf
+$ make all
+The expected output is: A file named file.txt is created in the current working directory with contents as "We are in 2019"
 ```
 
+To run all the programs in the directory use (**take ~30-40 mins**)
+```bash
+$ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Programs/
+$ ./run-tests.sh --cleankstate
+$ ./run-tests.sh --kstate --jobs 4
+```
 
+##### Testing using gcc-c torture tests
+Details about this testing are provided at [link](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/tests/gcc.c-torture/README.md).
 
+Running the entire suite will take days to complete and hence we provide a [sample job](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/tests/gcc.c-torture/sample_job/bin_worklist.txt) of test-cases and instructions to execute them (~ 3 mins runtime).
 
-
-
-
-
-
-
+```bash
+$ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/gcc.c-torture/sample_job
+$ ./run_sample.sh
+$ grep -l Fail Output/*.compare.log
+  Output/20010605-1-0.compare.log
+```
+The run logs might have diffs (or Fails) like above `Output/20010605-1-0.compare.log`. These are mainly due to the presence of instructions like `subq	$16, %rsp` whose result (value of destination register (`%rsp`) and status flags) depends on the value of `%rsp` which might be different for actual hardware and our simulated environment.
 
 #### Comparing with Stoke (Refer Section 4.2)
 In this section, we provide instructions about how we cross-checked (using Z3 comparison) our semantics of those instruction which are modeled by [Stoke](https://github.com/StanfordPL/stoke) (say ST1) as well. We own a separate branch of [Stoke](https://github.com/sdasgup3/strata-stoke) (say ST2) where we manually modeled many instruction's semantics to compare against ST1.
