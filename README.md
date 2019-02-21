@@ -189,7 +189,7 @@ Value obtained by hardware execution:  -17.850725 (0xc18ece49)
 But our semantics compute it as round(round(-2.477901 * 12.078431) + 12.078431)  = -17.850727 (0xc18ece4a), which incurs precision loss due to rounding twice.
 ```
 
-Running the some of the tests in the [working directory](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions), might take long time (~1 hr), but interested reader might try the following (~ 3mins)
+Running the some of the tests in the [working directory](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions), might take long time (\~1 hr), but interested reader might try the following (\~ 3mins)
 
 ```
 $ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions/adc/
