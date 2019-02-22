@@ -332,7 +332,7 @@ $ z3 test.z3
 ```
 While running `run.sh`, the reader can safely ignore the Z3 error messages, which is the expected behavior of the underlying K framework's symbolic execution engine.  But note that it does NOT affect the soundness of the verification reasoning, that is, K may fail to prove some correct programs (due to the Z3 failure), but will never prove a wrong program.
 
-## Artifacts for "Reported Claims"
+## Artifacts for "Miscellaneous Claims"
 
 ### Claims about instruction support stats by current and related works
 1. In Line 12-13, we mentioned "... This totals 3155 instruction variants, corresponding to 774
