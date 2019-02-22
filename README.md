@@ -19,7 +19,7 @@
       $ VBoxManage setextradata "vm_name" VBoxInternal/CPUM/IsaExts/AVX2 1
       ```
 
-Note: While testing the above VM image, some of the users reported that they faced issues in installing VirtalBox in host Ubuntu with secure boot ON. In case the reviwers face the similar issue, they may try out the very first solution as posted in [link](https://askubuntu.com/questions/900118/vboxdrv-sh-failed-modprobe-vboxdrv-failed-please-use-dmesg-to-find-out-why).
+Note: While testing the above VM image, some of the users reported that they faced issues in installing VirtualBox in host Ubuntu with secure boot ON. In case the reviewers face the similar issue, they may try out the very first solution as posted in [link](https://askubuntu.com/questions/900118/vboxdrv-sh-failed-modprobe-vboxdrv-failed-please-use-dmesg-to-find-out-why).
 
 
 ## Getting Started Guide
