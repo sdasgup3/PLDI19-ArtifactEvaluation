@@ -36,7 +36,7 @@ $ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/semantics
 $ cp registerInstructions/* memoryInstructions/* immediateInstructions/* systemInstructions/* underTestInstructions/
 $ ../scripts/kompile.pl --backend java
 ```
-**NOTE:** Interpreting a program using a compiled image including **all** the instruction's semantics is very slow, mainly because we are using a java backend. Hence, while interpreting a program we include the semanics of only those instructions which constitute the program.
+**NOTE:** Interpreting a program using a compiled image including **all** the instruction's semantics is very slow, mainly because we are using a java backend. Therefore, while interpreting a program we include the semanics of only those instructions constituting the program.
 
 ## A Simple Test Run
 
@@ -218,7 +218,7 @@ $ grep "Pass" Output/test.cstate
 
 ### Feature Testing
 
-Throughout the course of this project, we develop many programs to test various features of semantics, like library function, memory model. A collection is provide at [Programs]( https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Programs)
+Throughout the course of this project, we develop many programs to test various features of semantics, like library functions, memory model. A compilation is provide at [Programs]( https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Programs)
 
 The reviewer is encouraged to chose & run any program from `x86-semantics/tests/Programs`. For example the following (~97 sec),
 ```bash
@@ -247,14 +247,14 @@ $ ./run_sample.sh
 $ grep -l Fail Output/*.compare.log
   Output/20010605-1-0.compare.log
 ```
-The run logs might have diffs (or Fails) like above `Output/20010605-1-0.compare.log`. These are mainly due to the presence of instructions like `subq	$16, %rsp` whose result (value of destination register (`%rsp`) and status flags) depends on the value of `%rsp` which might be different for actual hardware and our simulated environment.
+The run logs might have diffs (or `Fail`) like above `Output/20010605-1-0.compare.log`. These could be mainly due to the presence of instructions like `subq	$16, %rsp` whose result (value of destination register (`%rsp`) and status flags) depends on the value of `%rsp` which might be different for actual hardware and our simulated environment.
 
 
 ## Comparing with Stoke (Section 4.2)
 
 In this section, we provide instructions about how we cross-checked (using Z3 comparison) our semantics of those instruction which are modeled by [Stoke](https://github.com/StanfordPL/stoke) (say ST1) as well. We own a separate branch of [Stoke](https://github.com/sdasgup3/strata-stoke) (say ST2) where we manually modeled many instruction's semantics to compare against ST1.
 
-Comparison is achieved by using unsat checks on the corresponding SMT formulas. Such comparison helped in unveiling many bugs as reported in Section 4.2.
+Comparison is achieved by using `unsat` checks on the corresponding SMT formulas. Such comparison helped unveiling many bugs as reported in Section 4.2.
 
 Below, we give example of one such instruction `psrlq` for which we found that the ST1 implementation to be buggy(which is fixed in ST1 by now using [pull request](https://github.com/StanfordPL/stoke/pull/984).
 
@@ -276,20 +276,18 @@ Expected result: `unsat`
 
 ## Applications (Section 5)
 
-In this section we presented some applications to demonstrate that
-our semantics can be used for formal reasoning of x86-64
-programs for a wide variety of purposes. Here, we present the artifacts for
-the applications presented in Sections 5.2, 5.3 and 5.4
+In this section we presented some applications to demonstrate that our semantics can be used for formal reasoning of x86-64
+programs for a wide variety of purposes. Here, we present the artifacts for the applications presented in Sections 5.2, 5.3 and 5.4
 
 ## Program Verification (Section 5.2)
 
 In this sub-section, we prove the functional correctness of the sum-to-n program.
 
 The directory structure:
-- [test-spec.k](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/test-spec.k): The actual specification file that is fed to the verifier. The specification has two parts:
+- [test-spec.k](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/sum_to_n_32_bit/test-spec.k): The actual specification file that is fed to the verifier. The specification has two parts:
              the top-level specification and the loop invariant.
-- [runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/runlog.txt) : The pre-populated output of the verifier.
-- [run.sh](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/run.sh)     : Script to run the prover.
+- [runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/sum_to_n_32_bit/runlog.txt) : The pre-populated output of the verifier.
+- [run.sh](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/sum_to_n_32_bit/run.sh)     : Script to run the prover.
 
 #### Reproducing `runlog.txt`:
 
@@ -300,25 +298,20 @@ $ ./run.sh
 
 #### Note:
 
-At the end of the section 5.2 in paper, we mentioned the time taken by the verifier to be
-~1 min, which can be can be cross-checked in the
-[runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/runlog.txt) file. The time reproduced by the above command is ~ 2 mins which might be due to the fact that we are running on VM.
-
+At the end of the section 5.2 in paper, we mentioned the time taken by the verifier to be ~1 min, which can be can be cross-checked in the [runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/sum_to_n_32_bit/runlog.txt) file. The time reproduced by the above command is ~ 2 mins which assume to be due to running on VM.
 
 ## Symbolic Execution (Section 5.3)
-In this section we  demonstrate how the symbolic execution
-capability can be used to find a security vulnerability.
+In this section we  demonstrate how the symbolic execution capability can be used to find a security vulnerability.
 
 
 The directory structure:
 - [test-spec.k](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/test-spec.k): The actual specification file that is fed to the verifier.
 - [runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/runlog.txt) : The pre-populated output of the verifier.
 - [run.sh](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/run.sh)     : Script to run the prover.
-- [path_condition.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/path_condition.z3) : The z3 query that need to be solved in order to get the input triggering the
-                    security vulnerability.
+- [path_condition.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/path_condition.z3) : The z3 query that need to be solved in order to get the input triggering the security vulnerability.
 
 #### Interpretation of the runlog.txt and reproducing the vulnerability:
-1. At line number 87 of runlog.txt, we obtain the path condition when the control reaches L2 when r >= a (refer figure 4(a)). We encode this condition as a Z3 formula in [path_condition.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/path_condition.z3) and `AND` it with the condition for a + b to overflow. The resulting formula is checked for satisfiability. We mentioned all the details in path_condition.z3 as comments and request the reviewer to have a look at it.
+1. At line number `87` of runlog.txt, we obtain the path condition when the control reaches L2 when r >= a (refer figure 4(a)). We encode this condition as a Z3 formula and `AND` it with the condition for a + b to overflow. The resulting formula is checked for satisfiability. We mentioned all the details in [path_condition.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/path_condition.z3) as comments and request the reviewer to have a look at it.
 2. We can execute `z3 path_condition.z3` to reproduce the inputs triggering the vulnerability as shown below.
 
 #### Reproducing `runlog.txt`:
@@ -329,11 +322,9 @@ $ z3 path_condition.z3
 ```
 
 ## Translation Validation of Optimizations (Section 5.4)
-In this section, we validated different optimizations of the "popcount" program, by checking the equivalence between the optimized programs.
-For the artifact evaluation, we will demonstrate the optimization made by Stoke super-optimizer (as this is the most interesting among the other optimizations). If interested, we will be happy to provide details about the equivalence of other optimizations.
+In this section, we validated different optimizations of the "popcount" program, by checking the equivalence between the optimized and un-optimized programs. For the artifact evaluation, we will demonstrate the optimization made by Stoke super-optimizer (as this is the most interesting among the other optimizations). If interested, we will be happy to provide details about the equivalence of other optimizations.
 
-We symbolically execute the un-optimized popcount program and stoke-optimized program individually and compares their return values (i.e., the symbolic expression of the %rax
-register value) using Z3.
+We symbolically execute the un-optimized popcount program and stoke-optimized program individually and compares their return values (i.e., the symbolic expression of the %rax register value) using Z3.
 
 The directory structure:
 - [test-spec.k](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/test-spec.k): The actual specification file, of the un-optimized program, that is fed to the symbolic executor.
@@ -342,7 +333,7 @@ The directory structure:
 - [test.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/test.z3)    : The z3 query that need to be solved in order to check the equivalence between the un-optimized and optimized programs.
 
 #### Interpretation of `runlog.txt`:
-At line number 8710 of [runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/runlog.txt), we obtain the K expression representing the symbolic output stored in %rax for the un-optimized program, which is  encoded in [test.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/test.z3) and checked for equivalence with the SMT formula corresponding to `popcntq_r64_r64` instruction. We mentioned all the details in [test.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/test.z3) as comments and request the reviewer to have a look at it.
+At line number `8710` of [runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/runlog.txt), we obtain the K expression representing the symbolic output stored in %rax for the un-optimized program, which is  encoded in as a Z3 formula and checked for equivalence with the SMT formula corresponding to `popcntq_r64_r64` instruction. We mentioned all the details in [test.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/test.z3) as comments and request the reviewer to have a look at it.
 
 
 #### Reproducing `runlog.txt` (take ~23 mins):
@@ -382,9 +373,9 @@ $ /home/sdasgup3/Github/binary-decompilation/x86-semantics/scripts --compareinte
 | ACL2 Support(Intel)| 255 	[32.9457364341085 %]|
 
 Note that:
-  - The number `1009` **does not** consider the instruction variants w.r.t register/immediate/memory.
+  - The number `1009` **does not** consider the instruction variants w.r.t register/immediate/memory. Refer to [Our Work](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/k-semantics/current_support.txt) to know the actual list of instructions supported by current work.
   - The numbers presented here for related work are counted generously and is true to the best of our knowledge till November 2018. It does not include the new instructions support that might have been added since then.
-  - To know about the actual list of instructions supported by each project till November 2018, refer [Our Work](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/k-semantics/current_support.txt), [BAP](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/bap/baprunlog.txt), [Radar2](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/radare2/r2log.txt), [Strata](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/strata/strata_orig_supported.txt), [Remill](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/mcsema/reportlist.txt), [ACL2](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/acl2/implemented.txt).
+  - To know about the actual list of instructions supported by each project till November 2018, refer  [BAP](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/bap/baprunlog.txt), [Radar2](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/radare2/r2log.txt), [Strata](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/strata/strata_orig_supported.txt), [Remill](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/mcsema/reportlist.txt), [ACL2](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/acl2/implemented.txt).
 
 
 ### In Line 136, we claimed "Our formal semantics is publicly available ..."
