@@ -44,6 +44,7 @@ $ ../scripts/run-single-c-file.sh ../tests/Programs/bubblesort/test.c
 ```
 The expected output must looks like
 ```C
+/* Some compile logs */
 Before Sort
 4 3 2 1 0
 After Sort
