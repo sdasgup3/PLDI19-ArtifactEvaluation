@@ -329,11 +329,12 @@ cd /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/pro
 ```
 
 ## Artifacts for "Reported Numbers/Claims"
-1. Instruction supported by our and related works
-    - In Line 12-13, we mentioned "... This totals 3155 instruction variants, corresponding to 774
+
+### Instruction supported by our and related works
+1. In Line 12-13, we mentioned "... This totals 3155 instruction variants, corresponding to 774
   mnemonics ..."
-    - In Line 51, we mentioned "Heule et al. ...,  but it covers only a fragment (∼47%) of all instructions ..."
-    - In Line 66-70, we mentioned "Goel et al. ...  only a small fragment (∼33%) of all user-level instructions..."
+2. In Line 51, we mentioned "Heule et al. ...,  but it covers only a fragment (∼47%) of all instructions ..."
+3. In Line 66-70, we mentioned "Goel et al. ...  only a small fragment (∼33%) of all user-level instructions..."
 
 The following script will generate the above statistics in a markdown table format shown below.
 ```bash
@@ -360,21 +361,20 @@ Note that:
   - To know about the actual list of instructions supported by each project till Novenber 2018, refer [Our Work](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/k-semantics/current_support.txt), [BAP](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/bap/baprunlog.txt), [Radar2](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/radare2/r2log.txt), [Strata](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/strata/strata_orig_supported.txt), [Remill](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/mcsema/reportlist.txt), [ACL2](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/acl2/implemented.txt).
 
 
-2. In Line 136, we mentioned "Our formal semantics is publicly available ..."
-    - Public [Github Repo](https://github.com/kframework/X86-64-semantics)
+### In Line 136, we mentioned "Our formal semantics is publicly available ..."
+Public [Github Repo](https://github.com/kframework/X86-64-semantics)
 
-3. In Line 185, we mentioned "Remill  updates the flag with 0 .. Radare  keeps it unmodified."
-The orresponding code can be veiwed at [Remill](https://github.com/trailofbits/remill/blob/master/tests/X86/Run.cpp#L398) & [Radare](https://github.com/sdasgup3/x86-64-instruction-summary/blob/ad67b2d5ac5565da4033b77afc82ce4e5195ef51/executale_binaries/register-variants/andnq_r64_r64_r64.r2log). Also, we have personal discussions with the respective authors about this.
+### In Line 185, we mentioned "Remill  updates the flag with 0 .. Radare  keeps it unmodified."
+The corresponding code can be veiwed at [Remill](https://github.com/trailofbits/remill/blob/master/tests/X86/Run.cpp#L398) & [Radare](https://github.com/sdasgup3/x86-64-instruction-summary/blob/ad67b2d5ac5565da4033b77afc82ce4e5195ef51/executale_binaries/register-variants/andnq_r64_r64_r64.r2log). Also, we have personal discussions with the respective authors about this.
 
-3. Instruction coverage effort
-    - In Line 323-326, we mentioned "To leverage previous work as much as possible, we took the semantic rules for about 60% of the instructions in scope from the formal semantics in Strata"
-    - In Line 351-352, we mentioned "We then manually added K rules for the remaining 40% of the target instructions..."
+### Instruction coverage effort
+1. In Line 323-326, we mentioned "To leverage previous work as much as possible, we took the semantic rules for about 60% of the instructions in scope from the formal semantics in Strata"
+2. In Line 351-352, we mentioned "We then manually added K rules for the remaining 40% of the target instructions..."
 
 
-4. In Line 574-576, we mentioned "For each instruction, we converted the SMT formulas that Strata provides to a K specification using a simple script (∼500 LOC)."
+### In Line 574-576, we mentioned "For each instruction, we converted the SMT formulas that Strata provides to a K specification using a simple script (∼500 LOC)."
 
-5. In Line 641-644, we mentioned "the original Strata-provided formula for shrxl %edx, %ecx, %ebx consists of 8971 terms (including the operator symbols), but we could simplify it to a formula
-consisting of only 7 terms"
+### In Line 641-644, we mentioned "the original Strata-provided formula for shrxl %edx, %ecx, %ebx consists of 8971 terms (including the operator symbols), but we could simplify it to a formula consisting of only 7 terms"
 
 
 15. FLowchart for instruction support.
