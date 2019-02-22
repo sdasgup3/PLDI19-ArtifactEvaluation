@@ -29,13 +29,14 @@ In this section, we provide the instructions to (1) Compile the semantics defini
 
 ## Compiling x86-64 Semantics
 
-In this section, we demonstrate how to compile the semantics of instructions along with the semantics of execution environment. Below, we have included semantics of all the instructions for compilation (using the `cp` command ) and the compilation will take up-to 15 mins. The reviewer can choose to include few instructions as well (for example, by including the instruction semantics in `systemInstructions` directory only).
+In this section, we demonstrate how to compile the semantics of instructions along with the semantics of execution environment. Below, we have included semantics of **all** the instructions for compilation (using the `cp` command ) and the compilation will take up-to 15 mins. The reviewer can choose to include few instructions as well (for example, by including the instruction semantics in `systemInstructions` directory only).
 
 ```bash
 $ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/semantics
 $ cp registerInstructions/* memoryInstructions/* immediateInstructions/* systemInstructions/* underTestInstructions/
 $ ../scripts/kompile.pl --backend java
 ```
+**NOTE:** Interpreting a program using a compiled image including **all** the instruction's semantics is very slow, mainly because we are using a java backend. Hence, while interpreting a program we include the semanics of only those instructions which constitute the program.
 
 ## A Simple Test Run
 
@@ -77,18 +78,20 @@ The instruction level testing is done using (1) [Stoke](https://github.com/Stanf
 
 All the test logs and commands are available at [link](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/nightlyruns). **( We do not provide the repository in VM as it weighs 33 GB)**
 
-Lets fist try to interpret some of the files present in the above link.
+Lets first try to interpret some of the files present in the above link.
  - [job.04](https://github.com/sdasgup3/x86-64-instruction-summary/blob/master/nightlyruns/job.04): A collection of instructions to be tested as a batch (or job).
- - [info.04](https://github.com/sdasgup3/x86-64-instruction-summary/blob/master/nightlyruns/info.04): Information about the job. Like the date on which the test was fired, output file name, etc.
+ - [info.04](https://github.com/sdasgup3/x86-64-instruction-summary/blob/master/nightlyruns/info.04): Information about the job, like the date on which the test was fired, output file name, etc.
  - [runlog.04](https://github.com/sdasgup3/x86-64-instruction-summary/blob/master/nightlyruns/runlog.04): The output of the job run.
 
 Note that the number `04` represents an ID that corresponds to `Test Chart` [tables](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/nightlyruns#test-charts-2) provided at [link](https://github.com/sdasgup3/x86-64-instruction-summary/blob/master/nightlyruns/README.md). These tables provide the information about how individual instructions are tested using 3 broad categories: Registers instructions, Immediate instructions and Memory instructions. The distribution is made because of different challenges need to address while testing each category.
 
-As the entire testing took several days to complete, so we will provide instructions about testings sample instructions from each category in order to reproduce the results.
+As the entire testing took several days to complete, so we will provide instructions to test samples from each category in order to reproduce the results.
 
 #### Register Instruction Test ( ~29 secs runtime ):
 
-The idea is to first create an instance of the assembly instruction under test and then to test that instance using a set of input CPU states. In the `Test charts` link above, we might find variants of the the command mentioned below, for example, one with an extra `--samereg` switch. This is to ensure that instructions like `xchg`, `xadd`, `cmpxchg` are tested with both the source and destination operands as same registers. This is important as the semantics rules of such instructions are different when the source and destination are the same and hence we test them separately.
+The idea is to first create an instance of the assembly instruction under test and then to test that instance using a set of input CPU states. In the `Test charts` link above, we might find variants of the command mentioned below, for example, one with an extra `--samereg` switch. This is to ensure that instructions like `xchg`, `xadd`, `cmpxchg` are tested with both the source and destination operands as same registers. This is important as the semantic rules of such instructions are different (an [example](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/semantics/registerInstructions/xaddq_r64_r64.k)) when the source and destination are the same and hence we test them separately.
+
+Below we show how to test a register instruction `psrlq_xmm_xmm`.
   ```bash
   $ cd ~/TestArena
   $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_concrete --opcode psrlq_xmm_xmm --workdir concrete_instances/register-variants/psrlq_xmm_xmm
@@ -113,13 +116,13 @@ The idea is to first create an instance of the assembly instruction under test a
     Execution time popcntq_r64_r64: 208 s
     Thread 1 done!: popcntq_r64_r64
   ```
-Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/concrete_instances/register-variants/psrlq_xmm_xmm)
+Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/blob/master/concrete_instances/register-variants/psrlq_xmm_xmm/check_stoke.06.log)
 
 Similar logs for other instructions can also be found using similar paths as above.
 
 #### Immediate Instruction Test ( ~2 mins runtime ):
 
-The idea is same as above except the fact that for each immediate instruction of immediate operand width as 8, we create 256 variants of instance of assembly instruction each corresponding to 256 immeidate values and test all of them. We spawn 256 software threads to accommodate all the runs for each instruction.
+The idea is same as above except the fact that for each immediate instruction of immediate operand width as 8, we create 256 instances of the assembly instruction each corresponding to 256 immediate values and test all of them by spawning 256 software threads.
 
 In the example below, we will be testing the instruction psrlq_xmm_imm8 for just 4 immediate operand values (0-3).
 ```bash
@@ -132,7 +135,7 @@ Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/tree
 
 #### Memory Instruction Test ( ~72 secs runtime ):
 
-The idea is same as above ideas (when the memory instruction has an immediate or register operand) except the fact the [Strata testcases](https://raw.githubusercontent.com/sdasgup3/strata-data-private/master/data-regs/testcases.tc) are not meant to test the memory instructions (In fact the Strata project do not test or synthesize the memory instructions). Hence, the testcases need to be modified slightly to accommodate testing memory-variants. For example, it we want to test `addq (%rbx), %rax`, we need to make sure that the register `%rbx` points to a valid memory address with some value to read from. We accomplish this using the switch `--update_tc` mentioned below.
+The idea is same the as above (when the memory instruction has an immediate or register operand) except the fact the [Strata testcases](https://raw.githubusercontent.com/sdasgup3/strata-data-private/master/data-regs/testcases.tc) are not meant to test the memory instructions (In fact the Strata project do not test or synthesize the memory instructions). Hence, the testcases need to be modified slightly to accommodate testing memory-variants. For example, it we want to test `addq (%rbx), %rax`, we need to make sure that the register `%rbx` points to a valid memory address with some value to read from. We accomplish this using the switch `--update_tc` mentioned below.
 
 ```bash
 $ cd ~/TestArena
@@ -140,15 +143,15 @@ $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_
 $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --opcode  psrlq_xmm_m128  --instructions_path concrete_instances/memory-variants/psrlq_xmm_m128/instructions/ --update_tc --testid 00
 $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --check_stoke --file concrete_instances/memory-variants/psrlq_xmm_m128/check_stoke.txt --instructions_path concrete_instances/memory-variants/psrlq_xmm_m128/instructions --use_updated_tc --testid 00
 ```
-Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/concrete_instances/memory-variants/psrlq_xmm_m128). Similar logs for other instructions can also be found using similar paths as above.
+Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/blob/master/concrete_instances/memory-variants/psrlq_xmm_m128/check_stoke.09.log). Similar logs for other instructions can also be found using similar paths as above.
 
 ### Testing Using K Framework
 
 Empowered by the fact that we can directly execute the semantics using the K framework, we validated our model by co-simulating it against a real machine.
 
-First, we will explain the employed testing infrastructure. The idea is to test each instruction using many test-inputs. The test inputs are specified conveniently using a template assembly program and a separate program `gentests.pl` reads the template and create the actual assembly language program to be tested. We use K-interppreter to execute the program and result is compared against the result obtained by running the program on actual hardware.
+First, we will explain the employed testing infrastructure. The idea is to test each instruction using many test-inputs. The test inputs are specified conveniently using a template assembly program. A separate script `gentests.pl` reads the template and create the actual assembly language program to be tested. We use K-interppreter to execute the program and result is compared against that obtained by running the program on actual hardware.
 
-The [working directory](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions) contain  instructions which are tested using the above idea. As the actual run might take long to complete, we provide directions to run some sample instructions with small number of inputs.
+The [working directory](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions) presents a compilation of some instructions which are tested using the above idea. As the actual run might take long to complete, we provide directions to run some sample instructions with small number of inputs.
 
 An example template program is shown below with comments explaining the template structure.
 ```C
@@ -173,19 +176,19 @@ TEST_INPUTS(             // Values of the 3 inputs.
 TEST_END
 ```
 
-The instructions below are use to generate the assembly program `(test.s)` and test it (~ 67.38 secs).
+The following instructions generate an assembly program `(test.s)` and test it (~ 67.38 secs).
 ```bash
 $ cd  /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions/sample_pclmulqdq
 $ ./run-test.sh
 
-The above contains following commands
+$ cat run-test.sh
 ../../../scripts/gentests.pl
 rm -rf ../../../semantics/underTestInstructions/*
 make all
 grep "Pass" Output/test.cstate
 ```
 
-Next, we will discuss how to reproduce the issue, mentioned at line 728-733, regarding the floating point precision. We will demonstrate this using `vfmadd` instruction (~ 70.20 secs).
+Next, we will discuss how to reproduce the issue, mentioned at line 728-733 of the paper, regarding floating point precision. We will demonstrate this using `vfmadd` instruction (~ 70.20 secs).
 ```
 $ cd  /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions/sample_vfmadd
 $ ./run-test.sh
