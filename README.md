@@ -19,7 +19,7 @@
       $ VBoxManage setextradata "vm_name" VBoxInternal/CPUM/IsaExts/AVX2 1
       ```
 
-Note: While testing the above VM image, some of the users reported that they faced issues in installing VirtalBox in host Ubuntu with secure boot ON. In case the reviwers face the similar issue, they may try out the very first solution as posted in [link](https://askubuntu.com/questions/900118/vboxdrv-sh-failed-modprobe-vboxdrv-failed-please-use-dmesg-to-find-out-why). 
+Note: While testing the above VM image, some of the users reported that they faced issues in installing VirtalBox in host Ubuntu with secure boot ON. In case the reviwers face the similar issue, they may try out the very first solution as posted in [link](https://askubuntu.com/questions/900118/vboxdrv-sh-failed-modprobe-vboxdrv-failed-please-use-dmesg-to-find-out-why).
 
 
 ## Getting Started Guide
@@ -333,7 +333,7 @@ While running `run.sh`, the reader can safely ignore the Z3 error messages, whic
 
 ## Artifacts for "Reported Claims"
 
-### Claims about instruction support stats by our and related works
+### Claims about instruction support stats by current and related works
 1. In Line 12-13, we mentioned "... This totals 3155 instruction variants, corresponding to 774
   mnemonics ..."
 2. In Line 51, we mentioned "Heule et al. ...,  but it covers only a fragment (∼47%) of all instructions ..."
@@ -372,7 +372,7 @@ The corresponding code can be viewed at [Remill](https://github.com/trailofbits/
 
 ### In Line 574-576, we claimed "For each instruction, we converted the SMT formulas that Strata provides to a K specification using a simple script (∼500 LOC)."
 The script can be found at [bvf2K.pl](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/scripts/bvf2K.pl)
-The script needs as input the k-port of the SMT formulas, which strata generates, for example [andnq_r64_r64_r64.k.format](https://github.com/sdasgup3/x86-64-instruction-summary/blob/ad67b2d5ac5565da4033b77afc82ce4e5195ef51/concrete_instances/register-variants/andnq_r64_r64_r64/instructions/andnq_r64_r64_r64/andnq_r64_r64_r64.k.format), which can be generated using a new backend that we added to the Strata project's `stoke_debug_circuit`
+The script needs as input the k-port of the instruction semantics. An example k-port for `andnq_r64_r64_r64` is [andnq_r64_r64_r64.k.format](https://github.com/sdasgup3/x86-64-instruction-summary/blob/ad67b2d5ac5565da4033b77afc82ce4e5195ef51/concrete_instances/register-variants/andnq_r64_r64_r64/instructions/andnq_r64_r64_r64/andnq_r64_r64_r64.k.format), which can be generated using a [new backend](https://github.com/sdasgup3/strata-stoke/blob/strata.stoke.ubuntu/tools/apps/stoke_debug_circuit.cc#L69) that we added to a Stoke tool, `stoke_debug_circuit`.
 ```bash
 $ /home/sdasgup3/Github/strata/stoke/bin/stoke_debug_circuit --opc "andnq_r64_r64_r64" --k_format
 ```
@@ -398,7 +398,7 @@ And, the simplified formula is given as
 /home/sdasgup3/Github/strata/stoke/bin/stoke_debug_circuit --opc "shrxl_r32_r32_r32" --smtlib_format
 ```
 
-The simplification formula which is responsible for the above simplification can be found using the diff between our maintained branch (1st argument of the diff command below) and the master branch of stoke. The implemented simplification rules are marked with a header `DSAND` for easy reference.
+The simplification rules/formulas, which is responsible for the above simplification, can be found using a diff between our maintained branch (1st argument of the diff command below) and the master branch of stoke. The implemented simplification rules are marked with a header `DSAND` for easy reference.
 ```bash
 $ gvimdiff ~/Github/strata/stoke/src/symstate/simplify.cc ~/Github/master_stoke/src/symstate/simplify.cc
 ```
