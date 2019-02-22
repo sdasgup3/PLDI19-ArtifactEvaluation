@@ -19,6 +19,7 @@
       $ VBoxManage setextradata "vm_name" VBoxInternal/CPUM/IsaExts/AVX2 1
       ```
 
+Note: While testing the above VM image, some of the users reported that they faced issues in installing VirtalBox in host Ubuntu with secure boot ON. In case the reviwers face the similar issue, they may try out the very first solution as posted in [link](https://askubuntu.com/questions/900118/vboxdrv-sh-failed-modprobe-vboxdrv-failed-please-use-dmesg-to-find-out-why). 
 
 
 ## Getting Started Guide
@@ -319,18 +320,20 @@ The directory structure:
 - [test.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/test.z3)    : The z3 query that need to be solved in order to check the equivalence between the un-optimized and optimized programs.
 
 #### Interpretation of the runlog.txt
-1. At line number 8710 of runlog.txt, we obtain the K expression representing the symbolic output stored in %rax for the un-optimized program.
-2. ...
+At line number 8710 of [runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/runlog.txt), we obtain the K expression representing the symbolic output stored in %rax for the un-optimized program, which is  encoded in [test.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/test.z3) and checked for equivalence with the SMT formula corresponding to `popcntq_r64_r64` instruction. We mentioned all the details in [test.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/test.z3) as comments and request the reviewer to have a look at it.
+
 
 #### Reproducing the runlog.txt (take ~23 mins)
+```bash
+$ cd /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/popcnt_loop
+$ ./run.sh
+$ z3 test.z3
 ```
-cd /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/popcnt_loop
-./run.sh
-```
+While running `run.sh`, the reader can safely ignore the Z3 error messages, which is the expected behavior of the underlying K framework's symbolic execution engine.  But note that it does NOT affect the soundness of the verification reasoning, that is, K may fail to prove some correct programs (due to the Z3 failure), but will never prove a wrong program.
 
-## Artifacts for "Reported Numbers/Claims"
+## Artifacts for "Reported Claims"
 
-### Instruction supported by our and related works
+### Claims about instruction support stats by our and related works
 1. In Line 12-13, we mentioned "... This totals 3155 instruction variants, corresponding to 774
   mnemonics ..."
 2. In Line 51, we mentioned "Heule et al. ...,  but it covers only a fragment (∼47%) of all instructions ..."
@@ -341,7 +344,7 @@ The following script will generate the above statistics in a markdown table form
 $ /home/sdasgup3/Github/binary-decompilation/x86-semantics/scripts --compareintel
 ```
 
-  | Scope of instrucion support | Number of Att/Intel Opcodes |
+  | Scope of instruction support | Number of Att/Intel Opcodes |
 |-----|-----|
  | Total Att/Intel Opcodes |1298/1000|
 | Ideal User Level Support(att/intel)| 1009/774|
@@ -358,24 +361,44 @@ $ /home/sdasgup3/Github/binary-decompilation/x86-semantics/scripts --compareinte
 Note that:
   - The number `1009` **does not** consider the instruction variants w.r.t register/immediate/memory.
   - The numbers presented here for related work are counted generously and is true to the best of our knowledge till November 2018. It does not include the new instructions support that might have been added since then.
-  - To know about the actual list of instructions supported by each project till Novenber 2018, refer [Our Work](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/k-semantics/current_support.txt), [BAP](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/bap/baprunlog.txt), [Radar2](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/radare2/r2log.txt), [Strata](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/strata/strata_orig_supported.txt), [Remill](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/mcsema/reportlist.txt), [ACL2](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/acl2/implemented.txt).
+  - To know about the actual list of instructions supported by each project till November 2018, refer [Our Work](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/k-semantics/current_support.txt), [BAP](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/bap/baprunlog.txt), [Radar2](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/radare2/r2log.txt), [Strata](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/strata/strata_orig_supported.txt), [Remill](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/mcsema/reportlist.txt), [ACL2](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/docs/relatedwork/acl2/implemented.txt).
 
 
-### In Line 136, we mentioned "Our formal semantics is publicly available ..."
+### In Line 136, we claimed "Our formal semantics is publicly available ..."
 Public [Github Repo](https://github.com/kframework/X86-64-semantics)
 
-### In Line 185, we mentioned "Remill  updates the flag with 0 .. Radare  keeps it unmodified."
-The corresponding code can be veiwed at [Remill](https://github.com/trailofbits/remill/blob/master/tests/X86/Run.cpp#L398) & [Radare](https://github.com/sdasgup3/x86-64-instruction-summary/blob/ad67b2d5ac5565da4033b77afc82ce4e5195ef51/executale_binaries/register-variants/andnq_r64_r64_r64.r2log). Also, we have personal discussions with the respective authors about this.
+### In Line 185, we claimed "Remill  updates the flag with 0 .. Radare  keeps it unmodified."
+The corresponding code can be viewed at [Remill](https://github.com/trailofbits/remill/blob/master/tests/X86/Run.cpp#L398) & [Radare](https://github.com/sdasgup3/x86-64-instruction-summary/blob/ad67b2d5ac5565da4033b77afc82ce4e5195ef51/executale_binaries/register-variants/andnq_r64_r64_r64.r2log). Also, we have personal discussions with the respective authors about this.
 
-### Instruction coverage effort
-1. In Line 323-326, we mentioned "To leverage previous work as much as possible, we took the semantic rules for about 60% of the instructions in scope from the formal semantics in Strata"
-2. In Line 351-352, we mentioned "We then manually added K rules for the remaining 40% of the target instructions..."
+### In Line 574-576, we claimed "For each instruction, we converted the SMT formulas that Strata provides to a K specification using a simple script (∼500 LOC)."
+The script can be found at [bvf2K.pl](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/scripts/bvf2K.pl)
+The script needs as input the k-port of the SMT formulas, which strata generates, for example [andnq_r64_r64_r64.k.format](https://github.com/sdasgup3/x86-64-instruction-summary/blob/ad67b2d5ac5565da4033b77afc82ce4e5195ef51/concrete_instances/register-variants/andnq_r64_r64_r64/instructions/andnq_r64_r64_r64/andnq_r64_r64_r64.k.format), which can be generated using a new backend that we added to the Strata project's `stoke_debug_circuit`
+```bash
+$ /home/sdasgup3/Github/strata/stoke/bin/stoke_debug_circuit --opc "andnq_r64_r64_r64" --k_format
+```
+Similar k-ports for other instructions can be found in similar paths.
 
+The script outputs the k-module-definition file [andnq_r64_r64_r64.k](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/semantics/registerInstructions/andnq_r64_r64_r64.k) using the following commands.
+```bash
 
-### In Line 574-576, we mentioned "For each instruction, we converted the SMT formulas that Strata provides to a K specification using a simple script (∼500 LOC)."
+$ /home/sdasgup3/Github/binary-decompilation/x86-semantics/scripts/bvf2K.pl --opcode andnq_r64_r64_r64 --kfile ~/Github/strata-data/output-strata/instruction-summary/concrete_instances/register-variants/andnq_r64_r64_r64/instructions/andnq_r64_r64_r64/andnq_r64_r64_r64.k.format --type register
+```
 
-### In Line 641-644, we mentioned "the original Strata-provided formula for shrxl %edx, %ecx, %ebx consists of 8971 terms (including the operator symbols), but we could simplify it to a formula consisting of only 7 terms"
+Note that the current VM image **does not** allow running the above command for any other instruction because that would need the [repository](https://github.com/sdasgup3/x86-64-instruction-summary), containing the k-port of SMT formula for all the instructions, weighing 33G, to be available in the image.
 
+### In Line 641-644, we claimed that "the original Strata-provided formula for shrxl %edx, %ecx, %ebx consists of 8971 terms (including the operator symbols), but we could simplify it to a formula consisting of only 7 terms"
 
-15. FLowchart for instruction support.
-16. Porting (https://github.com/sdasgup3/binary-decompilation/wiki/Handling-Register-Instructions)
+The strata-provided complex formula can be obtained by
+```bash
+$ /home/sdasgup3/Github/master_stoke/bin/stoke_debug_formula --opc "shrxl_r32_r32_r32" --smtlib_format
+```
+
+And, the simplified formula is given as
+```bash
+/home/sdasgup3/Github/strata/stoke/bin/stoke_debug_circuit --opc "shrxl_r32_r32_r32" --smtlib_format
+```
+
+The simplification formula which is responsible for the above simplification can be found using the diff between our maintained branch (1st argument of the diff command below) and the master branch of stoke. The implemented simplification rules are marked with a header `DSAND` for easy reference.
+```bash
+$ gvimdiff ~/Github/strata/stoke/src/symstate/simplify.cc ~/Github/master_stoke/src/symstate/simplify.cc
+```
