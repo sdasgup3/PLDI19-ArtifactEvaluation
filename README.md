@@ -241,7 +241,7 @@ $ ./run_sample.sh
 $ grep -l Fail Output/*.compare.log
   Output/va-arg-11-0.compare.log
 ```
-The run logs **might** have diffs (or `Fail`) like above `Output/va-arg-11-0.compare.log`. These is due to the presence of instructions like `subq	$CONST, %rsp` whose results (value of destination register (`%rsp`) and status flags) depends on the value of `%rsp` chosen during the actual hardware execution.  Depending on the value of `rsp` assigned during the actual hardware run, the flag registers values may diff against the simulated values.
+The run logs **might** have diffs (or `Fail`) like above `Output/va-arg-11-0.compare.log`. These is due to the presence of instructions like `subq	$CONST, %rsp` whose results (value of destination register (`%rsp`) and status flags) depend on the runtime value assigned to `%rsp` during the actual hardware execution. Depending on the runtime value, the flag registers values may diff against the simulated values.
 
 ## Comparing with Stoke (Section 4.2)
 
