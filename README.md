@@ -241,13 +241,13 @@ $ ./run_sample.sh
 $ grep -l Fail Output/*.compare.log
   Output/va-arg-11-0.compare.log
 ```
-The run logs **might** have diffs (or `Fail`) like above `Output/va-arg-11-0.compare.log`. These is due to the presence of instructions like `subq	$CONST, %rsp` whose results (value of destination register (`%rsp`) and status flags) depend on the runtime value assigned to `%rsp` during the actual hardware execution. Depending on the runtime value, the flag registers values may diff against the simulated values.
+The run logs **might** have diffs (or `Fail`) like above `Output/va-arg-11-0.compare.log`. These is due to the presence of instructions like `subq	$CONST, %rsp` whose results (value of destination register (`%rsp`) and status flags) depend on the runtime value assigned to `%rsp` during the actual hardware execution. Depending on the runtime value, the hardware collected flag registers values may diff against the simulated values.
 
 ## Comparing with Stoke (Section 4.2)
 
 In this section, we provide instructions about how we cross-checked (using Z3 comparison) our semantics of those instruction which are modeled by [Stoke](https://github.com/StanfordPL/stoke) (say ST1) as well. We own a separate branch of [Stoke](https://github.com/sdasgup3/strata-stoke) (say ST2) where we manually modeled many instruction's semantics to compare against ST1.
 
-Comparison is achieved by using `unsat` checks on the corresponding SMT formulas. Such comparison helped unveiling many bugs as reported in Section 4.2.
+Comparison is achieved by using `unsat` checks on the corresponding SMT formulas. Such comparison helped unveiling many bugs as reported in Section 4.2 of the paper.
 
 Below, we give example of one such instruction `psrlq` for which we found that the ST1 implementation to be buggy (which is fixed in ST1 by now using [pull request](https://github.com/StanfordPL/stoke/pull/984). The shell commands below (1) Prepare a work directory containing an instance of the instruction under test, (2) Generate SMT formula using the semantics provided by ST1, (3) Generate SMT formula using our semantics as provided by ST2, and (4) Compare them.
 
@@ -304,7 +304,7 @@ The directory structure:
 - [path_condition.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/path_condition.z3) : The z3 query that need to be solved in order to get the input triggering the security vulnerability.
 
 #### Interpretation of the runlog.txt and reproducing the vulnerability:
-1. At line number `87` of runlog.txt, we obtain the path condition when the control reaches L2 when r >= a (refer figure 4(a)). We encode this condition as a Z3 formula and `AND` it with the condition for a + b to overflow. The resulting formula is checked for satisfiability. We mentioned all the details in [path_condition.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/path_condition.z3) as comments and request the reviewer to have a look at it.
+1. At line number `87` of [runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/runlog.txt), we obtain the path condition when the control reaches L2 when r >= a (refer figure 4(a)). We encode this condition as a Z3 formula and `AND` it with the condition for a + b to overflow. The resulting formula is checked for satisfiability. We mentioned all the details in [path_condition.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/path_condition.z3) as comments and request the reviewer to have a look at it.
 2. We can execute `z3 path_condition.z3` to reproduce the inputs triggering the vulnerability as shown below.
 
 #### Reproducing `runlog.txt` (~ 2 mins):
