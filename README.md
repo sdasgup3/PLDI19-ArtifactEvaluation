@@ -6,8 +6,8 @@
 - Accepted Paper [pdf](https://github.com/sdasgup3/PLDI19-ArtifactEvaluation/blob/master/pldi2019-paper195.pdf)
 - VM Details
   - VM Player: [VirtualBox 6.0.4](https://www.virtualbox.org/wiki/Downloads) Or [VirtualBox 5.1](https://www.virtualbox.org/wiki/Download_Old_Builds_5_1)
-  - Ubuntu Image: [ova](https://drive.google.com/file/d/1dF-P3DM7-dXLsXXQ8FaewhnJnV30nYSB/view?usp=sharing)
-    - md5 hash: 99bd8938921de700847c5e6d751452f1
+  - Ubuntu Image: [ova](https://drive.google.com/file/d/1vBeTZ8xM75JC_HnA5GN0FFtFU7u1ujpo/view?usp=sharing)
+    - md5 hash: 3501fcd9f082d448c63e2a642fbc4718
     - login: sdasgup3
     - password: aecadmin123
   - Guest Machine requirements
@@ -29,20 +29,20 @@ In this section, we provide the instructions to (1) Compile the semantics defini
 
 ## Compiling x86-64 Semantics
 
-In this section, we demonstrate how to compile the semantics of instructions along with the semantics of execution environment. Below, we have included semantics of **all** the instructions for compilation (using the `cp` command ) and the compilation will take up-to 15 mins. The reviewer can choose to include few instructions as well (for example, by including the instruction semantics in `systemInstructions` directory only).
+In this section, we demonstrate how to compile the semantics of instructions along with the semantics of execution environment. Below, we have included semantics of **all** the instructions for compilation (using the `cp` command ) and the compilation will take up-to 5 mins. The reviewer can choose to include few instructions as well (for example, by including the instruction semantics in `systemInstructions` directory only).
 
 ```bash
 $ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/semantics
 $ cp registerInstructions/* memoryInstructions/* immediateInstructions/* systemInstructions/* underTestInstructions/
 $ ../scripts/kompile.pl --backend java
 ```
-**NOTE:** Interpreting a program using a compiled image including **all** the instruction's semantics is very slow, mainly because we are using a java backend. Therefore, while interpreting a program we include the semanics of only those instructions constituting the program.
+**NOTE:** Interpreting a program using a compiled image including **all** the instruction's semantics is very slow, mainly because we are using a java backend. Therefore, while interpreting a program we include the semantics of only those instructions constituting the program.
 
 ## A Simple Test Run
 
 We demonstrate how to interpret a X64-64 assembly language program using the semantics compiled above. For demonstration, we use the [bubble-sort program](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/tests/Programs/bubblesort/test.c), which not only does the sorting but pretty-prints its results. The example, was chosen to show the c-library support provided (lines 799-800 of the paper) over and above the executability of the semantics.
 
-The following command converts a C file to assembly program and interprets it.
+The following command converts a C file to assembly program and interprets it (~ 3 mins).
 
 ```bash
 $ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/semantics
@@ -91,7 +91,7 @@ As the entire testing took several days to complete, so we will provide instruct
 
 The idea is to first create an instance of the assembly instruction under test and then to test that instance using a set of input CPU states. In the `Test charts` link above, we might find variants of the command mentioned below, for example, one with an extra `--samereg` switch. This is to ensure that instructions like `xchg`, `xadd`, `cmpxchg` are tested with both the source and destination operands as same registers. This is important as the semantic rules of such instructions are different (an [example](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/semantics/registerInstructions/xaddq_r64_r64.k)) when the source and destination are the same and hence we test them separately.
 
-Below we show how to test a register instruction `psrlq_xmm_xmm`.
+Below we show how to test a register instruction `psrlq_xmm_xmm`. The shell commands below (1) Prepare a work directory containing an instance of the instruction under test, and (2) Test that instance using a set of 6630 inputs states.
   ```bash
   $ cd ~/TestArena
   $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_concrete --opcode psrlq_xmm_xmm --workdir concrete_instances/register-variants/psrlq_xmm_xmm
@@ -124,7 +124,7 @@ Similar logs for other instructions can also be found using similar paths as abo
 
 The idea is same as above except the fact that for each immediate instruction of immediate operand width as 8, we create 256 instances of the assembly instruction each corresponding to 256 immediate values and test all of them by spawning 256 software threads.
 
-In the example below, we will be testing the instruction psrlq_xmm_imm8 for just 4 immediate operand values (0-3).
+In the example below, we will be testing the instruction psrlq_xmm_imm8 for just 4 immediate operand values (0-3). The shell commands below (1) Prepare a work directory containing 256 instances of the instruction under test, (2) Trim the number of instances to 4, and (3) Test all the instances using a set of 6630 inputs states.
 ```bash
 $ cd ~/TestArena
 $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --prepare_concrete_imm --opcode psrlq_xmm_imm8 --workdir concrete_instances/immediate-variants/psrlq_xmm_imm8
@@ -135,7 +135,7 @@ Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/tree
 
 #### Memory Instruction Test ( ~72 secs runtime ):
 
-The idea is same the as above (when the memory instruction has an immediate or register operand) except the fact the [Strata testcases](https://raw.githubusercontent.com/sdasgup3/strata-data-private/master/data-regs/testcases.tc) are not meant to test the memory instructions (In fact the Strata project do not test or synthesize the memory instructions). Hence, the testcases need to be modified slightly to accommodate testing memory-variants. For example, it we want to test `addq (%rbx), %rax`, we need to make sure that the register `%rbx` points to a valid memory address with some value to read from. We accomplish this using the switch `--update_tc` mentioned below.
+The idea is same the as above (when the memory instruction has an immediate or register operand) except the fact the [Strata testcases](https://raw.githubusercontent.com/sdasgup3/strata-data-private/master/data-regs/testcases.tc) are not meant to test the memory instructions (In fact the Strata project do not test or synthesize the memory instructions). Hence, the testcases need to be modified slightly to accommodate testing memory-variants. For example, it we want to test `addq (%rbx), %rax`, we need to make sure that the register `%rbx` points to a valid memory address with some value to read from. We accomplish this using the switch `--update_tc` mentioned below. The shell commands below (1) Prepare a work directory containing 256 instances of the instruction under test, (2) Update the test-inputs as mentioned above, and (3) Test that instance using a set of 6630 inputs states.
 
 ```bash
 $ cd ~/TestArena
@@ -180,12 +180,6 @@ The following instructions generate an assembly program `(test.s)` and test it (
 ```bash
 $ cd  /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions/sample_pclmulqdq
 $ ./run-test.sh
-
-$ cat run-test.sh
-../../../scripts/gentests.pl
-rm -rf ../../../semantics/underTestInstructions/*
-make all
-grep "Pass" Output/test.cstate
 ```
 
 Next, we will discuss how to reproduce the issue, mentioned at line 728-733 of the paper, regarding floating point precision. We will demonstrate this using `vfmadd` instruction (~ 70.20 secs).
@@ -228,7 +222,7 @@ $ make all
 The expected output is: A file named file.txt is created in the current working directory with contents as "We are in 2019"
 ```
 
-To run all the programs in the directory use (**take ~30-40 mins**)
+To run all the programs in the directory use (**take ~20-30 mins**)
 ```bash
 $ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Programs/
 $ ./run-tests.sh --cleankstate
@@ -256,7 +250,7 @@ In this section, we provide instructions about how we cross-checked (using Z3 co
 
 Comparison is achieved by using `unsat` checks on the corresponding SMT formulas. Such comparison helped unveiling many bugs as reported in Section 4.2.
 
-Below, we give example of one such instruction `psrlq` for which we found that the ST1 implementation to be buggy(which is fixed in ST1 by now using [pull request](https://github.com/StanfordPL/stoke/pull/984).
+Below, we give example of one such instruction `psrlq` for which we found that the ST1 implementation to be buggy (which is fixed in ST1 by now using [pull request](https://github.com/StanfordPL/stoke/pull/984). The shell commands below (1) Prepare a work directory containing an instance of the instruction under test, (2) Generate SMT formula using the semantics provided by ST1, (3) Generate SMT formula using our semantics as provided by ST2, and (4) Compare them.
 
 ```bash
 $ cd ~/TestArena
@@ -314,7 +308,7 @@ The directory structure:
 1. At line number `87` of runlog.txt, we obtain the path condition when the control reaches L2 when r >= a (refer figure 4(a)). We encode this condition as a Z3 formula and `AND` it with the condition for a + b to overflow. The resulting formula is checked for satisfiability. We mentioned all the details in [path_condition.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/path_condition.z3) as comments and request the reviewer to have a look at it.
 2. We can execute `z3 path_condition.z3` to reproduce the inputs triggering the vulnerability as shown below.
 
-#### Reproducing `runlog.txt`:
+#### Reproducing `runlog.txt` (~ 2 mins):
 ```bash
 $ cd /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/safe_addrptr_32
 $ ./run.sh
@@ -355,7 +349,7 @@ While running `run.sh`, the reader can safely ignore the Z3 error messages, whic
 
 The following script will generate the above statistics in a markdown table format shown below.
 ```bash
-$ /home/sdasgup3/Github/binary-decompilation/x86-semantics/scripts --compareintel
+$ /home/sdasgup3/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --compareintel
 ```
 
   | Scope of instruction support | Number of Att/Intel Opcodes |
@@ -409,7 +403,7 @@ $ /home/sdasgup3/Github/master_stoke/bin/stoke_debug_formula --opc "shrxl_r32_r3
 
 And, the simplified formula is given as
 ```bash
-/home/sdasgup3/Github/strata/stoke/bin/stoke_debug_circuit --opc "shrxl_r32_r32_r32" --smtlib_format
+$ /home/sdasgup3/Github/strata/stoke/bin/stoke_debug_circuit --opc "shrxl_r32_r32_r32" --smtlib_format
 ```
 
 The simplification rules/formulas, which is responsible for the above simplification, can be found using a diff between our maintained branch (1st argument of the diff command below) and the master branch of stoke. The implemented simplification rules are marked with a header `DSAND` for easy reference.
