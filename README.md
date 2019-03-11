@@ -345,8 +345,8 @@ $ z3 test.z3
 
 While running `run.sh`, the reader can safely ignore the Z3 error messages, which is the expected behavior of the underlying K framework's symbolic execution engine.  But note that it does NOT affect the soundness of the verification reasoning, that is, K may fail to prove some correct programs (due to the Z3 failure), but will never prove a wrong program.
 
-The following script can be used to ignore the error messages (and the clutter)
-```
+The following script can be used to ignore the error messages from the log file (and the clutter). Usage: `script <logfile>`
+```bash
 #!/bin/bash
 
 sed -i '/declare-fun bvlshr/d' $1
