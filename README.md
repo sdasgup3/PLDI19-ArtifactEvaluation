@@ -321,21 +321,36 @@ We symbolically execute the un-optimized popcount program and stoke-optimized pr
 
 The directory structure:
 - [test-spec.k](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/test-spec.k): The actual specification file, of the un-optimized program, that is fed to the symbolic executor.
-- [runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/runlog.txt) : The pre-populated output of the symbolic executor.
+- ~~[runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/runlog.txt) : The pre-populated output of the symbolic executor.~~
+- [updatedLog.txt](https://drive.google.com/file/d/1AxvtP4i9CvmqN3DcqsjzOit8AgowqHzR/view?usp=sharing) : The pre-populated output of the symbolic executor.
 - [run.sh](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/run.sh)     : Script to run the symbolic executor.
 - [test.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/test.z3)    : The z3 query that need to be solved in order to check the equivalence between the un-optimized and optimized programs.
 
-#### Interpretation of `runlog.txt`:
-At line number `8710` of [runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/runlog.txt), we obtain the K expression representing the symbolic output stored in %rax for the un-optimized program, which is  encoded in as a Z3 formula and checked for equivalence with the SMT formula corresponding to `popcntq_r64_r64` instruction. We mentioned all the details in [test.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/test.z3) as comments and request the reviewer to have a look at it.
+
+#### Interpretation of ~~`runlog.txt`~~ `updatedLog.txt`:
+~~At line number `8710` of [runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/runlog.txt), we obtain the K expression representing the symbolic output stored in %rax for the un-optimized program, which is  encoded in as a Z3 formula and checked for equivalence with the SMT formula corresponding to `popcntq_r64_r64` instruction. We mentioned all the details in [test.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/test.z3) as comments and request the reviewer to have a look at it.~~
+
+At line number `37350` of [updatedLog.txt](https://drive.google.com/file/d/1AxvtP4i9CvmqN3DcqsjzOit8AgowqHzR/view?usp=sharing), we obtain the K expression representing the symbolic output stored in %rax for the un-optimized program, which is  encoded in as a Z3 formula and checked for equivalence with the SMT formula corresponding to `popcntq_r64_r64` instruction. We mentioned all the details in [test.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/test.z3) as comments and request the reviewer to have a look at it.
 
 
-#### Reproducing `runlog.txt` (take ~23 mins):
+#### Reproducing ~~`runlog.txt`~~ 'updatedLog.txt' (take ~23 mins):
+Download the patch [simplification_programV_working.patch](https://drive.google.com/file/d/17zN8GHR341dgsp1qKbcKne9xWUbPjsn5/view?usp=sharing)
 ```bash
+$ cd /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/semantics
+$ git apply <path of>/simplification_programV_working.patch
 $ cd /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/popcnt_loop
 $ ./run.sh
 $ z3 test.z3
 ```
+
 While running `run.sh`, the reader can safely ignore the Z3 error messages, which is the expected behavior of the underlying K framework's symbolic execution engine.  But note that it does NOT affect the soundness of the verification reasoning, that is, K may fail to prove some correct programs (due to the Z3 failure), but will never prove a wrong program.
+
+
+## Revision Note (Added 10th March)
+
+We have updated the run log file from `runlog.txt` to `updatedLog.txt`, as the former is not reproducible during artifact evaluation. The reason is: The version of the runlog.txt was [created](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/popcnt_loop/runlog.txt) using an older version of semantics which contain more simplification lemmas (hence the K expressions in the file looks simpler) than the recent version bundled for the artifact evaluation. Those simplifications lemmas were later dropped thinking that they were redundant, but it seems that one particular lemma is still helpful in generating simpler K expression. We provide a [patch](https://drive.google.com/file/d/17zN8GHR341dgsp1qKbcKne9xWUbPjsn5/view?usp=sharing) containing the relevant simplification rule.
+
+**Note that:** the reason for adding this patch is to make the K expression in generated log look similar to the those presented earlier in `runlog.txt`. For example, the K expression at line `8710` of runlog.txt is exactly the same as the one in `37350` of updatedLog.txt. However, the semantics of the simplified K expression (by applying the patch) should be equal to the non-simplified ones (by skipping the patch).
 
 ## Miscellaneous Claims
 
