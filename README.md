@@ -208,6 +208,15 @@ $ make all
 $ grep "Pass" Output/test.cstate
 ```
 
+#### Revision Note (Added 18th March)
+While testing instructions like `vaddsub`, it might take a while to finish the interpreter run. To expedite that, we can partition the test inputs into 4 groups (like [vaddsub1](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions/vaddsub1), [vaddsub2](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions/vaddsub2), [vaddsub3](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions/vaddsub3), [vaddsub4](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions/vaddsub4)), and fire the interpreter runs in parallel. This is achieved using a [script](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions/run-tests.sh) which takes a [file](https://github.com/sdasgup3/binary-decompilation/blob/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions/filelist_vaddsub.txt) as input, specifying the instructions to test, and can be invoked as follows:
+```bash
+$ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Instructions
+// Download the above mentioned script and input file and put it in current directory.
+$ ./run-tests.sh --all --list filelist_vaddsub.txt
+```
+The run would take approximately 15 mins to complete. We have also uploaded the expected outputs (like [this](https://github.com/sdasgup3/binary-decompilation/tree/pldi19_AE_ConcreteExec/x86-semantics/tests/Instructions/vaddsub1/Output)).
+
 ## Program Level Testing (Section 4.1)
 
 ### Feature Testing
@@ -228,6 +237,28 @@ $ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Programs/
 $ ./run-tests.sh --cleankstate
 $ ./run-tests.sh --kstate --jobs 4
 ```
+The following table specifies the some of the expected output from each program run.
+|Program Name | Expected Output  |
+|--|--|
+| bubblesort | "4 3 2 1 0 \n 0 1 2 3 4" printed in stdout  |
+| stdio_fgets | "We are in 2012" printed in stdout |
+| stdio_fgetc | "ABC \n DEF" printed in stdout |
+| stdio_puts |"tutorialspoint\ncompileonline" printed in stdout|
+| stdio_fputs | "This is c programming.This is a system programming language." printed in newly created file file.txt |
+| stdio_fread | "this is tutorialspoint" printed in stdout.|
+| stdio_fputc | "Hello World" printed in newly created file alphabet.txt |
+| stdio_fwrite | "This is c programming.This is a system programming language." printed in newly created file file.txt |
+| stdio_fflush | writing "test" to file example.txt and read from the file and print "test" in stdout. |
+| stdio_fscanf | Reading "We are in 2018." from a file and print them in succession. |
+| stdio_sprintf | Writes "Value of Pi = 3.1415926535897931e+00" to a string and then to stdio. |
+| stdio_snprintf | Read the first 5 characters of "geeksforgeeks" and outputs "string:\ngeeks\ncharacter count = 14". "geeks" is the 6 read characters including the null terminator and 14 is the return value of snprintf |
+| stdio_fprintf | Prints "We are in 2019" in a newly created file  file.txt |
+| avrargs | prints 55 to stdout  as the output of sum to first 10 natural numbers. |
+
+For the outputs of other programs, we should refer to the K interpreter run logs at `<program name>/Output/test.kstate`
+
+
+
 
 ### Testing Against GCC Torture Tests
 
