@@ -219,7 +219,7 @@ The reviewer is encouraged to chose & run any program from `x86-semantics/tests/
 $ cd /home/sdasgup3/Github/binary-decompilation/x86-semantics/tests/Programs/stdio_fprintf
 $ rm -rf ../../../semantics/underTestInstructions/*
 $ make all
-The expected output is: A file named file.txt is created in the current working directory with contents as "We are in 2019"
+The expected output is: A file named file.txt is created in the current working directory with contents as "We are in 2012"
 ```
 
 To run all the programs in the directory use (**take ~20-30 mins**)
