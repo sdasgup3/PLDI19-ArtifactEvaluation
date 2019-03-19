@@ -120,6 +120,14 @@ Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/blob
 
 Similar logs for other instructions can also be found using similar paths as above.
 
+##### Revision notes (Added 18th March)
+In order to test any other register instructions, use the [script](https://drive.google.com/file/d/1Xp38ZAWsI6EgJ3IB_-mFRxDBD9aAQ_Gy/view?usp=sharing) as follows:
+```bash
+$ cd ~/TestArena
+$ ./run_instruction_level_testing.sh --reg --opc vpsrlw_xmm_xmm_xmm
+```
+Other instruction opcodes (as specified by `opc`)  can be found at [link](https://drive.google.com/file/d/17MFGi08iGQ2dXQy7HuGi4xgk_3xZFTnm/view?usp=sharing). Note that while runing some of the instructions, we might get an error like `unavailable cpu flags {bmi1 f16c}`. These CPU flags are available in the native machine that we used for the experimets, but not exposed in the VM running on top.
+
 #### Immediate Instruction Test ( ~2 mins runtime ):
 
 The idea is same as above except the fact that for each immediate instruction of immediate operand width as 8, we create 256 instances of the assembly instruction each corresponding to 256 immediate values and test all of them by spawning 256 software threads.
@@ -133,6 +141,14 @@ $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --check_st
 ```
 Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/tree/master/concrete_instances/immediate-variants/psrlq_xmm_imm8). Similar logs for other instructions can also be found using similar paths as above.
 
+##### Revision notes (Added 18th March)
+In order to test any other register instructions, use the [script](https://drive.google.com/file/d/1Xp38ZAWsI6EgJ3IB_-mFRxDBD9aAQ_Gy/view?usp=sharing) as follows:
+```bash
+$ cd ~/TestArena
+$ ./run_instruction_level_testing.sh --imm --opc blendpd_xmm_xmm_imm8
+```
+Other instruction opcodes (as specified by `opc`)  can be found at [link](https://drive.google.com/file/d/1tvW2EMqMC97oeey-k1J4tqh7nhnPxadw/view?usp=sharing). Note that while runing some of the instructions, we might get an error like `unavailable cpu flags {bmi1 f16c}`. These CPU flags are available in the native machine that we used for the experimets, but not exposed in the VM running on top.
+
 #### Memory Instruction Test ( ~72 secs runtime ):
 
 The idea is same the as above (when the memory instruction has an immediate or register operand) except the fact the [Strata testcases](https://raw.githubusercontent.com/sdasgup3/strata-data-private/master/data-regs/testcases.tc) are not meant to test the memory instructions (In fact the Strata project do not test or synthesize the memory instructions). Hence, the testcases need to be modified slightly to accommodate testing memory-variants. For example, it we want to test `addq (%rbx), %rax`, we need to make sure that the register `%rbx` points to a valid memory address with some value to read from. We accomplish this using the switch `--update_tc` mentioned below. The shell commands below (1) Prepare a work directory containing 256 instances of the instruction under test, (2) Update the test-inputs as mentioned above, and (3) Test that instance using a set of 6630 inputs states.
@@ -144,6 +160,14 @@ $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --opcode  
 $ ~/Github/binary-decompilation/x86-semantics/scripts/process_spec.pl --check_stoke --file concrete_instances/memory-variants/psrlq_xmm_m128/check_stoke.txt --instructions_path concrete_instances/memory-variants/psrlq_xmm_m128/instructions --use_updated_tc --testid 00
 ```
 Actual runlog: [Log](https://github.com/sdasgup3/x86-64-instruction-summary/blob/master/concrete_instances/memory-variants/psrlq_xmm_m128/check_stoke.09.log). Similar logs for other instructions can also be found using similar paths as above.
+
+##### Revision notes (Added 18th March)
+In order to test any other register instructions, use the [script](https://drive.google.com/file/d/1Xp38ZAWsI6EgJ3IB_-mFRxDBD9aAQ_Gy/view?usp=sharing) as follows:
+```bash
+$ cd ~/TestArena
+$ ./run_instruction_level_testing.sh --mem --opc cmovnal_r32_m32
+```
+Other instruction opcodes (as specified by `opc`)  can be found at [link](https://drive.google.com/file/d/1_PRQETTfoA8wUJ9JdYV8N1iRZlP-A3uk/view?usp=sharing). Note that while runing some of the instructions, we might get an error like `unavailable cpu flags {bmi1 f16c}`. These CPU flags are available in the native machine that we used for the experimets, but not exposed in the VM running on top.
 
 ### Testing Using K Framework
 
