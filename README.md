@@ -238,6 +238,7 @@ $ ./run-tests.sh --cleankstate
 $ ./run-tests.sh --kstate --jobs 4
 ```
 The following table specifies the some of the expected output from each program run.
+
 |Program Name | Expected Output  |
 |--|--|
 | bubblesort | "4 3 2 1 0 \n 0 1 2 3 4" printed in stdout  |
