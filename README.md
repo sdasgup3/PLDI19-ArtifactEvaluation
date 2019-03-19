@@ -126,7 +126,7 @@ In order to test any other register instructions, use the [script](https://drive
 $ cd ~/TestArena
 $ ./run_instruction_level_testing.sh --reg --opc vpsrlw_xmm_xmm_xmm
 ```
-Other instruction opcodes (as specified by `opc`)  can be found at [link](https://drive.google.com/file/d/17MFGi08iGQ2dXQy7HuGi4xgk_3xZFTnm/view?usp=sharing). Note that while runing some of the instructions, we might get an error like `unavailable cpu flags {bmi1 f16c}`. These CPU flags are available in the native machine that we used for the experimets, but not exposed in the VM running on top.
+Other instruction opcodes (as specified by `opc`)  can be found at [link](https://drive.google.com/file/d/17MFGi08iGQ2dXQy7HuGi4xgk_3xZFTnm/view?usp=sharing). Note that while running some of the instructions, we might get an error like `unavailable cpu flags {bmi1 f16c}`. These CPU flags are available in the native machine that we used for the experiments, but not exposed in the VM running on top.
 
 #### Immediate Instruction Test ( ~2 mins runtime ):
 
@@ -147,7 +147,7 @@ In order to test any other register instructions, use the [script](https://drive
 $ cd ~/TestArena
 $ ./run_instruction_level_testing.sh --imm --opc blendpd_xmm_xmm_imm8
 ```
-Other instruction opcodes (as specified by `opc`)  can be found at [link](https://drive.google.com/file/d/1tvW2EMqMC97oeey-k1J4tqh7nhnPxadw/view?usp=sharing). Note that while runing some of the instructions, we might get an error like `unavailable cpu flags {bmi1 f16c}`. These CPU flags are available in the native machine that we used for the experimets, but not exposed in the VM running on top.
+Other instruction opcodes (as specified by `opc`)  can be found at [link](https://drive.google.com/file/d/1tvW2EMqMC97oeey-k1J4tqh7nhnPxadw/view?usp=sharing). Note that while running some of the instructions, we might get an error like `unavailable cpu flags {bmi1 f16c}`. These CPU flags are available in the native machine that we used for the experiments, but not exposed in the VM running on top.
 
 #### Memory Instruction Test ( ~72 secs runtime ):
 
@@ -167,7 +167,7 @@ In order to test any other register instructions, use the [script](https://drive
 $ cd ~/TestArena
 $ ./run_instruction_level_testing.sh --mem --opc cmovnal_r32_m32
 ```
-Other instruction opcodes (as specified by `opc`)  can be found at [link](https://drive.google.com/file/d/1_PRQETTfoA8wUJ9JdYV8N1iRZlP-A3uk/view?usp=sharing). Note that while runing some of the instructions, we might get an error like `unavailable cpu flags {bmi1 f16c}`. These CPU flags are available in the native machine that we used for the experimets, but not exposed in the VM running on top.
+Other instruction opcodes (as specified by `opc`)  can be found at [link](https://drive.google.com/file/d/1_PRQETTfoA8wUJ9JdYV8N1iRZlP-A3uk/view?usp=sharing). Note that while running some of the instructions, we might get an error like `unavailable cpu flags {bmi1 f16c}`. These CPU flags are available in the native machine that we used for the experiments, but not exposed in the VM running on top.
 
 ### Testing Using K Framework
 
