@@ -364,7 +364,9 @@ The directory structure:
 2. We can execute `z3 path_condition.z3` to reproduce the inputs triggering the vulnerability as shown below.
 
 #### Revision Note (Added 29 March)
-During artifact evalualtion of the the reviewer's find that the z3 (packaged with the VM version) is producing errneous model.
+1. Note that in the spec file, we need to encode the post condition that  `control reaches else path (L2) && a+b overflow`. We modified the code to return 1 and 0 in the then and else branch of the 'r < a' conditional check. Now, for encoding if `control reaches else path`, we added a post condition to ensure that `RAX == 0`.
+
+2. During artifact evalualtion of the the reviewer's find that the z3 (packaged with the VM version) is producing errneous model.
 We found that it might be a bug in version 4.4.1 (https://github.com/Z3Prover/z3/issues/2212).
 Hence, we recommend to use latest version of the tool.
 Please download the latest z3 from `https://github.com/Z3Prover/z3/releases`
