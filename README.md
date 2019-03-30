@@ -363,6 +363,12 @@ The directory structure:
 1. At line number `87` of [runlog.txt](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/runlog.txt), we obtain the path condition when the control reaches L2 when r >= a (refer figure 4(a)). We encode this condition as a Z3 formula and `AND` it with the condition for a + b to overflow. The resulting formula is checked for satisfiability. We mentioned all the details in [path_condition.z3](https://github.com/sdasgup3/binary-decompilation/blob/programV_working/x86-semantics/program-veriifcation/safe_addrptr_32/path_condition.z3) as comments and request the reviewer to have a look at it.
 2. We can execute `z3 path_condition.z3` to reproduce the inputs triggering the vulnerability as shown below.
 
+#### Revision Note (Added 29 March)
+During artifact evalualtion of the the reviewer's find that the z3 (packaged with the VM version) is producing errneous model.
+We found that it might be a bug in version 4.4.1 (https://github.com/Z3Prover/z3/issues/2212).
+Hence, we recommend to use latest version of the tool.
+Please download the latest z3 from `https://github.com/Z3Prover/z3/releases`
+
 #### Reproducing `runlog.txt` (~ 2 mins):
 ```bash
 $ cd /home/sdasgup3/Github/binary-decompilation_programV_working/x86-semantics/program-veriifcation/safe_addrptr_32
