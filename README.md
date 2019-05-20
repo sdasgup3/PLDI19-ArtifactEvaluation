@@ -1,4 +1,6 @@
-[Paper 195] PLDI 2019 Artifact Evaluation
+
+
+PLDI 2019 Artifact Evaluation [![DOI](https://zenodo.org/badge/171170265.svg)](https://zenodo.org/badge/latestdoi/171170265)
 =========================================
 
 # Artifact Submission
